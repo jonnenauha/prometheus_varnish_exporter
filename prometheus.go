@@ -45,6 +45,11 @@ func (p *prometheusMetric) Reset() {
 	if p.gaugeVec != nil {
 		p.gaugeVec.Reset()
 	} else {
+		// @todo Should this be done to singleton gauges?
+		// This zero value will stay here if scrape error occurs.
+		// Should we emit back the last known value or zero?
+		// Why do vec gauges get reseted, looks like they lose last known value there?
+		// So this would be consistent with that behavior.
 		p.gauge.Set(0)
 	}
 }
@@ -61,12 +66,16 @@ func (p *prometheusMetric) Gauge() prometheus.Gauge {
 // Get labels as a string.
 func (p *prometheusMetric) Labels() string {
 	if len(p.labels) > 0 {
-		return prettyPrintsMap(p.labels)
+		parts := []string{}
+		for k, v := range p.labels {
+			parts = append(parts, k+":"+v)
+		}
+		return strings.Join(parts, ", ")
 	}
 	return ""
 }
 
-// Returns label keys or nil if not defined.
+// Returns label keys or nil if no labels have been attached.
 // @note Due to golang map range the returned list may be in different order
 // on each invocation. Don't assume order when using the list.
 func (p *prometheusMetric) LabelNames() []string {
@@ -83,13 +92,13 @@ func (p *prometheusMetric) LabelNames() []string {
 // prometheusExporter
 
 type prometheusExporter struct {
+	sync.RWMutex
+
 	namespace string
 	metrics   []*prometheusMetric
 
 	up                          prometheus.Gauge
 	totalScrapes, failedScrapes prometheus.Counter
-
-	mutex sync.RWMutex
 }
 
 func NewPrometheusExporter() *prometheusExporter {
@@ -139,11 +148,12 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 		}(time.Now())
 	}
 
-	pe.totalScrapes.Inc()
-	pe.up.Set(1)
-
-	// scrape
+	// scrape: this is a blocking operation and is safe for concurrent use.
 	err := VarnishExporter.Update()
+
+	pe.up.Set(1)
+	pe.totalScrapes.Inc()
+
 	if err != nil {
 		pe.up.Set(0)
 		pe.failedScrapes.Inc()
@@ -153,6 +163,11 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	for _, pMetric := range pe.metrics {
 		pMetric.Reset()
 	}
+
+	// lock below state for value updated, anything above is guarded.
+	pe.Lock()
+	defer pe.Unlock()
+
 	// update values, if no errors on scrape
 	if err == nil {
 		for _, pMetric := range pe.metrics {
@@ -171,6 +186,9 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 }
 
 func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric) error {
+	pe.Lock()
+	defer pe.Unlock()
+
 	pe.metrics = make([]*prometheusMetric, 0)
 
 	for _, m := range metrics {
@@ -179,7 +197,7 @@ func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric) error {
 			Namespace: pe.namespace,
 			Name:      pm.Name,
 			Help:      m.Description,
-			// @todo Put varnish version number here or should it be its own metric
+			// @todo Put varnish version number here or should it be its own metric?
 			//ConstLabels: prometheus.Labels{"type": pm.Group},
 		}
 
@@ -233,7 +251,7 @@ var (
 		group{name: "mgt", prefixes: []string{
 			"MGT.",
 		}},
-		// must be last so other groups have time to override
+		// must be last so above groups have a opportunity to override
 		group{name: "main", prefixes: []string{
 			"MAIN.",
 		}},

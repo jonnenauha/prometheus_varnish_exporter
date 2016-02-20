@@ -114,14 +114,3 @@ func endsWithAny(str string, postfixes []string, cs caseSensitivity) bool {
 	}
 	return false
 }
-
-func prettyPrintsMap(objs map[string]string) string {
-	if objs == nil || len(objs) == 0 {
-		return ""
-	}
-	strs := []string{}
-	for k, v := range objs {
-		strs = append(strs, k+":"+v)
-	}
-	return strings.Join(strs, ", ")
-}

@@ -19,14 +19,6 @@ const (
 	varnishstatExe = "varnishstat"
 )
 
-var (
-	ignoredLinesList = []string{
-		"varnishstat",
-		"field name",
-		"-----",
-	}
-)
-
 // varnishMetric
 
 type varnishMetric struct {
@@ -77,7 +69,6 @@ func (v *varnishExporter) queryVersion() error {
 	scanner := bufio.NewScanner(buf)
 	for scanner.Scan() {
 		return v.parseVersion(scanner.Text())
-
 	}
 	return nil
 }
@@ -86,7 +77,6 @@ func (v *varnishExporter) parseVersion(version string) error {
 	if v.version == nil {
 		v.version = NewVarnishVersion()
 	}
-
 	r := regexp.MustCompile(`(\d)\.?(\d)?\.?(\d)?(?:.*revision\s(.*)\))?`)
 	parts := r.FindStringSubmatch(version)
 	if len(parts) > 1 {
@@ -118,7 +108,7 @@ func (v *varnishExporter) Initialize() error {
 		v.metricsByName[m.Name] = m
 	}
 	if len(v.metricsByName) != len(v.metrics) {
-		return fmt.Errorf("No metrics found from %s output", varnishstatExe)
+		return fmt.Errorf("Metrics count mismatch after mapping: map:%d flat:%d", len(v.metricsByName), len(v.metrics))
 	}
 	return nil
 }
@@ -153,6 +143,8 @@ func (v *varnishExporter) Update() error {
 		}
 		m := v.metricsByName[name]
 		if m == nil {
+			// @todo Shedule a new init query and recreate internal state if
+			// more stats have emerged after service startup.
 			logWarn("Failed to find existing metric for %q", name)
 			continue
 		}
@@ -162,7 +154,7 @@ func (v *varnishExporter) Update() error {
 		data := raw.(map[string]interface{})
 
 		// We are only interested in the new value for updating existing metrics.
-		// Type is float64 or there would have been a error in parseMetrics.
+		// Type is float64 or there would have been an error in parseMetrics.
 		if value, ok := data["value"]; ok {
 			m.Value = value.(float64)
 		}
@@ -247,10 +239,16 @@ func (v *varnishExporter) queryMetricsList() ([]*varnishMetric, error) {
 func (v *varnishExporter) parseMetricsList(r io.Reader) ([]*varnishMetric, error) {
 	scanner := bufio.NewScanner(r)
 
+	ignoredLinesPrefixes := []string{
+		"varnishstat",
+		"field name",
+		"-----",
+	}
+
 	var metrics []*varnishMetric
 	for scanner.Scan() {
 		line := scanner.Text()
-		if len(line) == 0 || startsWithAny(line, ignoredLinesList, caseInsensitive) {
+		if len(line) == 0 || startsWithAny(line, ignoredLinesPrefixes, caseInsensitive) {
 			continue
 		}
 		if parts := strings.SplitAfterN(line, " ", 2); len(parts) == 2 {

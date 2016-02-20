@@ -38,60 +38,6 @@ func Test_VarnishVersion(t *testing.T) {
 }
 
 func Test_VarnishMetrics(t *testing.T) {
-	lists := [][]byte{
-		// varnish 4.x
-		[]byte(`
-Varnishstat -f option fields:
-Field name                     Description
-----------                     -----------
-MAIN.uptime                    Child process uptime
-MAIN.sess_conn                 Sessions accepted
-MAIN.sess_drop                 Sessions dropped
-MAIN.sess_fail                 Session accept failures
-MAIN.client_req_400            Client requests received, subject to 400 errors
-MAIN.client_req_417            Client requests received, subject to 417 errors
-MAIN.client_req                Good client requests received
-MAIN.cache_hit                 Cache hits
-MAIN.cache_hitpass             Cache hits for pass`),
-		// varnish 3.x
-		[]byte(`
-Varnishstat -f option fields:
-Field name                     Description
-----------                     -----------
-client_conn                    Client connections accepted
-client_drop                    Connection dropped, no sess/wrk
-client_req                     Client requests received
-cache_hit                      Cache hits
-cache_hitpass                  Cache hits for pass
-cache_miss                     Cache misses
-backend_conn                   Backend conn. success
-backend_unhealthy              Backend conn. not attempted`),
-	}
-	listResults := []int{9, 8}
-
-	for i, list := range lists {
-		var (
-			exporter varnishExporter
-			err      error
-		)
-		if exporter.metrics, err = exporter.parseMetricsList(bytes.NewBuffer(list)); err != nil {
-			t.Error(err.Error())
-			continue
-		}
-		if len(exporter.metrics) != listResults[i] {
-			t.Errorf("Found %d metrics, expected %d", len(exporter.metrics), listResults[i])
-			continue
-		}
-		for _, m := range exporter.metrics {
-			if m.Name == "" || m.Description == "" {
-				t.Errorf("Failed to parse metric name/desc: %#v", m)
-			}
-		}
-		if !t.Failed() {
-			t.Logf("varnishstat -l: %d OK with %d metrics", i, len(exporter.metrics))
-		}
-	}
-
 	jsons := [][]byte{
 		// varnish 4.x
 		[]byte(`
@@ -149,7 +95,7 @@ backend_unhealthy              Backend conn. not attempted`),
 	"VBE.default(127.0.0.1,,8080).vcls": {"type": "VBE", "ident": "default(127.0.0.1,,8080)", "value": 1, "flag": "i", "description": "VCL references"},
 	"VBE.default(127.0.0.1,,8080).happy": {"type": "VBE", "ident": "default(127.0.0.1,,8080)", "value": 0, "flag": "b", "description": "Happy health probes"}
 }`)}
-	listResults = []int{7, 11}
+	listResults := []int{7, 11}
 
 	for i, json_ := range jsons {
 		var (
@@ -171,6 +117,62 @@ backend_unhealthy              Backend conn. not attempted`),
 		}
 		if !t.Failed() {
 			t.Logf("varnishstat -j: %d OK with %d metrics", i, len(exporter.metrics))
+		}
+	}
+
+	// @todo The -l option is no longer used in the actual app, remove these tests
+	// when that code is removed completely.
+	lists := [][]byte{
+		// varnish 4.x
+		[]byte(`
+Varnishstat -f option fields:
+Field name                     Description
+----------                     -----------
+MAIN.uptime                    Child process uptime
+MAIN.sess_conn                 Sessions accepted
+MAIN.sess_drop                 Sessions dropped
+MAIN.sess_fail                 Session accept failures
+MAIN.client_req_400            Client requests received, subject to 400 errors
+MAIN.client_req_417            Client requests received, subject to 417 errors
+MAIN.client_req                Good client requests received
+MAIN.cache_hit                 Cache hits
+MAIN.cache_hitpass             Cache hits for pass`),
+		// varnish 3.x
+		[]byte(`
+Varnishstat -f option fields:
+Field name                     Description
+----------                     -----------
+client_conn                    Client connections accepted
+client_drop                    Connection dropped, no sess/wrk
+client_req                     Client requests received
+cache_hit                      Cache hits
+cache_hitpass                  Cache hits for pass
+cache_miss                     Cache misses
+backend_conn                   Backend conn. success
+backend_unhealthy              Backend conn. not attempted`),
+	}
+	listResults = []int{9, 8}
+
+	for i, list := range lists {
+		var (
+			exporter varnishExporter
+			err      error
+		)
+		if exporter.metrics, err = exporter.parseMetricsList(bytes.NewBuffer(list)); err != nil {
+			t.Error(err.Error())
+			continue
+		}
+		if len(exporter.metrics) != listResults[i] {
+			t.Errorf("Found %d metrics, expected %d", len(exporter.metrics), listResults[i])
+			continue
+		}
+		for _, m := range exporter.metrics {
+			if m.Name == "" || m.Description == "" {
+				t.Errorf("Failed to parse metric name/desc: %#v", m)
+			}
+		}
+		if !t.Failed() {
+			t.Logf("varnishstat -l: %d OK with %d metrics", i, len(exporter.metrics))
 		}
 	}
 }

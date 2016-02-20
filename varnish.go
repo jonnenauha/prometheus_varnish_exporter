@@ -4,25 +4,108 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
 	"os/exec"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const (
 	varnishstatExe = "varnishstat"
 )
 
-// Utils
+var (
+	descCache  = make(map[string]*prometheus.Desc)
+	mDescCache sync.RWMutex
+)
+
+func scrapeVarnish(ch chan<- prometheus.Metric) error {
+	buf, errExec := executeVarnishstat("-j")
+	if errExec != nil {
+		return errExec
+	}
+	// The output JSON annoyingly is not stuctured so that we could make a nice map[string]struct for it.
+	metricsJSON := make(map[string]interface{})
+	dec := json.NewDecoder(buf)
+	if err := dec.Decode(&metricsJSON); err != nil {
+		return err
+	}
+
+	// This is a bit broad but better than locking on each desc query below.
+	mDescCache.Lock()
+	defer mDescCache.Unlock()
+
+	for vName, raw := range metricsJSON {
+		if vName == "timestamp" {
+			continue
+		}
+		if dt := reflect.TypeOf(raw); dt.Kind() != reflect.Map {
+			if StartParams.Verbose {
+				logWarn("Found unexpected data from json: %s: %#v", vName, raw)
+			}
+			continue
+		}
+		data, ok := raw.(map[string]interface{})
+		if !ok {
+			if StartParams.Verbose {
+				logWarn("Failed to cast to map[string]interface{}: %s: %#v", vName, raw)
+			}
+			continue
+		}
+		var (
+			vGroup       = prometheusGroup(vName)
+			vDescription string
+			vIdentifier  string
+			vValue       float64
+			vErr         error
+		)
+		if value, ok := data["description"]; ok && vErr == nil {
+			if vDescription, ok = value.(string); !ok {
+				vErr = fmt.Errorf("%s description it not a string", vName)
+			}
+		}
+		if value, ok := data["ident"]; ok && vErr == nil {
+			if vIdentifier, ok = value.(string); !ok {
+				vErr = fmt.Errorf("%s ident it not a string", vName)
+			}
+		}
+		if value, ok := data["value"]; ok && vErr == nil {
+			if vValue, ok = value.(float64); !ok {
+				vErr = fmt.Errorf("%s value it not a float64", vName)
+			}
+		}
+		if vErr != nil {
+			if StartParams.Verbose {
+				logWarn(vErr.Error())
+			}
+			continue
+		}
+
+		pName, pDescription, pLabelKeys, pLabelValues := computePrometheusInfo(vName, vGroup, vIdentifier, vDescription)
+
+		descKey := pName + "_" + strings.Join(pLabelKeys, "_")
+		pDesc, ok := descCache[descKey]
+		if !ok {
+			pDesc = prometheus.NewDesc(
+				pName,
+				pDescription,
+				pLabelKeys,
+				nil,
+			)
+			descCache[descKey] = pDesc
+		}
+		ch <- prometheus.MustNewConstMetric(pDesc, prometheus.GaugeValue, vValue, pLabelValues...)
+	}
+	return nil
+}
 
 // Returns the result of 'varnishtat' with optional command line params.
-func ExecuteVarnishstat(params ...string) (*bytes.Buffer, error) {
+func executeVarnishstat(params ...string) (*bytes.Buffer, error) {
 	buf := bytes.Buffer{}
 	cmd := exec.Command(varnishstatExe, params...)
 	cmd.Stdout = &buf
@@ -34,170 +117,6 @@ func ExecuteVarnishstat(params ...string) (*bytes.Buffer, error) {
 		return nil, err
 	}
 	return &buf, nil
-}
-
-// varnishMetric
-
-type varnishMetric struct {
-	Name               string
-	Value              float64
-	Description        string
-	Identifier         string
-	Type, Flag, Format string
-}
-
-// varnishExporter
-
-type varnishExporter struct {
-	sync.RWMutex
-
-	metrics       []*varnishMetric
-	metricsByName map[string]*varnishMetric
-}
-
-func NewVarnishExporter() *varnishExporter {
-	return &varnishExporter{
-		metricsByName: make(map[string]*varnishMetric),
-	}
-}
-
-func (v *varnishExporter) MetricByName(name string) *varnishMetric {
-	v.RLock()
-	m := v.metricsByName[name]
-	v.RUnlock()
-	return m
-}
-
-// Initializes exporter.
-func (v *varnishExporter) Initialize() (err error) {
-	v.Lock()
-	defer v.Unlock()
-
-	v.metrics, err = v.queryMetrics()
-	if err == nil && len(v.metrics) == 0 {
-		return fmt.Errorf("No metrics found from %s output", varnishstatExe)
-	}
-	v.metricsByName = make(map[string]*varnishMetric)
-	for _, m := range v.metrics {
-		v.metricsByName[m.Name] = m
-	}
-	if len(v.metricsByName) != len(v.metrics) {
-		return fmt.Errorf("Metrics count mismatch after mapping: map:%d flat:%d", len(v.metricsByName), len(v.metrics))
-	}
-	return nil
-}
-
-// Updates all metrics from varnishstat.
-func (v *varnishExporter) Update() error {
-	v.Lock()
-	defer v.Unlock()
-
-	// query process
-	if len(v.metrics) == 0 {
-		return errors.New("varnishExporter.Collect: no metrics to update")
-	}
-	buf, err := ExecuteVarnishstat("-j")
-	if err != nil {
-		return err
-	}
-
-	// The output JSON annoyingly is not stuctured so that we could make a nice struct for it.
-	// it has a 'timestamp' key
-	// @todo slight code duplication with parseMetrics, this is a bit slimmed down impl though.
-	var metricsJSON map[string]interface{}
-	dec := json.NewDecoder(buf)
-	if errDec := dec.Decode(&metricsJSON); errDec != nil {
-		return errDec
-	}
-
-	const timestamp = "timestamp"
-	for name, raw := range metricsJSON {
-		if name == timestamp {
-			continue
-		}
-		m := v.metricsByName[name]
-		if m == nil {
-			// @todo Shedule a new init query and recreate internal state if
-			// more stats have emerged after service startup.
-			logWarn("Failed to find existing metric for %q", name)
-			continue
-		}
-		// @note We can skip the reflect type check and cast validation here.
-		// They were executed in parseMetrics and if failed, would never end up
-		// int metricsByName.
-		data := raw.(map[string]interface{})
-
-		// We are only interested in the new value for updating existing metrics.
-		// Type is float64 or there would have been an error in parseMetrics.
-		if value, ok := data["value"]; ok {
-			m.Value = value.(float64)
-		}
-	}
-	return nil
-}
-
-// Initial query at startup to resolve available metrics.
-func (v *varnishExporter) queryMetrics() ([]*varnishMetric, error) {
-	buf, err := ExecuteVarnishstat("-j")
-	if err != nil {
-		return nil, err
-	}
-	return v.parseMetrics(buf)
-}
-
-// Parse new metrics.
-func (v *varnishExporter) parseMetrics(r io.Reader) ([]*varnishMetric, error) {
-	// The output JSON annoyingly is not stuctured so that we could make a nice struct for it.
-	// it has a 'timestamp' key
-	var metricsJSON map[string]interface{}
-	dec := json.NewDecoder(r)
-	if err := dec.Decode(&metricsJSON); err != nil {
-		return nil, err
-	}
-
-	const timestamp = "timestamp"
-	var metrics []*varnishMetric
-	for name, raw := range metricsJSON {
-		if name == timestamp {
-			continue
-		}
-		if dt := reflect.TypeOf(raw); dt.Kind() != reflect.Map {
-			return nil, fmt.Errorf("Found unexpected data from json: %q = %#v", name, raw)
-		}
-		data, ok := raw.(map[string]interface{})
-		if !ok {
-			return nil, fmt.Errorf("Failed to cast to map[string]interface{}: %q = %#v", name, raw)
-		}
-		m := &varnishMetric{
-			Name: name,
-		}
-		for prop, value := range data {
-			switch prop {
-			case "description":
-				m.Description = value.(string)
-			case "ident":
-				m.Identifier = value.(string)
-			case "type":
-				m.Type = value.(string)
-			case "flag":
-				m.Flag = value.(string)
-			case "format":
-				m.Format = value.(string)
-			case "value":
-				m.Value, ok = value.(float64)
-				if !ok {
-					return nil, fmt.Errorf("Non float64 property value: %s = %#v", prop, value)
-				}
-			default:
-				// Test mode failure only, don't break future versions that might add more stuff
-				if StartParams.Test {
-					return nil, fmt.Errorf("Unhandled property: %s = %#v", prop, value)
-				}
-			}
-		}
-		metrics = append(metrics, m)
-	}
-	return metrics, nil
 }
 
 // varnishVersion
@@ -220,7 +139,7 @@ func (v *varnishVersion) Initialize() error {
 }
 
 func (v *varnishVersion) queryVersion() error {
-	buf, err := ExecuteVarnishstat("-V")
+	buf, err := executeVarnishstat("-V")
 	if err != nil {
 		return err
 	}

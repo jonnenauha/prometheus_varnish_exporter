@@ -7,17 +7,13 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
 	PrometheusExporter = NewPrometheusExporter()
-	Varnish            = &varnish{
-		Version:  NewVarnishVersion(),
-		Exporter: NewVarnishExporter(),
-	}
+	VarnishVersion     = NewVarnishVersion()
 
 	StartParams = &startParams{
 		Host: "",
@@ -26,11 +22,6 @@ var (
 	}
 	logger *log.Logger
 )
-
-type varnish struct {
-	Version  *varnishVersion
-	Exporter *varnishExporter
-}
 
 type startParams struct {
 	Host    string
@@ -64,40 +55,32 @@ func main() {
 		logFatal(err.Error())
 	}
 
-	if err := Varnish.Version.Initialize(); err != nil {
+	// Initialize
+	if err := VarnishVersion.Initialize(); err != nil {
 		logFatal("Varnish version initialize failed: %s", err.Error())
 	}
-
-	t := time.Now()
-	if err := Varnish.Exporter.Initialize(); err != nil {
-		logFatal("Varnish exporter initialize failed: %s", err.Error())
-	}
-	logInfo("Initialized %d metrics from %s %s in %s\n\n", len(Varnish.Exporter.metrics), varnishstatExe, Varnish.Version, time.Now().Sub(t).String())
-
-	if err := PrometheusExporter.exposeMetrics(Varnish.Exporter.metrics); err != nil {
-		logFatal("Exposing metrics failed: %s", err.Error())
+	if err := PrometheusExporter.Initialize(); err != nil {
+		logFatal("Prometheus exporter initialize failed: %s", err.Error())
 	}
 
+	// Test mode
 	if StartParams.Test {
-		dumpMetrics(PrometheusExporter)
-
-		t = time.Now()
-		if errUpdate := Varnish.Exporter.Update(); errUpdate == nil {
-			logInfo("Executed values update in %s", time.Now().Sub(t))
-		} else {
-			logFatal("VarnishExporter.Update: %s", errUpdate.Error())
-		}
-	}
-
-	prometheus.MustRegister(PrometheusExporter)
-
-	if StartParams.Test {
+		metrics := make(chan prometheus.Metric)
+		go func() {
+			for m := range metrics {
+				logInfo("%s", m.Desc())
+			}
+		}()
+		logFatalError(scrapeVarnish(metrics))
+		close(metrics)
 		os.Exit(0)
 	}
 
 	// Start serving
 	listenAddress := fmt.Sprintf("%s:%d", StartParams.Host, StartParams.Port)
 	logInfo("Server starting on %s", listenAddress)
+
+	prometheus.MustRegister(PrometheusExporter)
 
 	http.Handle(StartParams.Path, prometheus.Handler())
 	logFatalError(http.ListenAndServe(listenAddress, nil))

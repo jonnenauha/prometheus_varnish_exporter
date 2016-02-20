@@ -54,15 +54,24 @@ func NewVarnishExporter() *varnishExporter {
 	}
 }
 
-func (v *varnishExporter) queryVersion() error {
-	buf := &bytes.Buffer{}
-	cmd := exec.Command(varnishstatExe, "-V")
-	cmd.Stdout = buf
-	cmd.Stderr = buf
+// Returns the result of 'varnishtat' with optional command line params.
+func (v *varnishExporter) executeVarnishstat(params ...string) (*bytes.Buffer, error) {
+	buf := bytes.Buffer{}
+	cmd := exec.Command(varnishstatExe, params...)
+	cmd.Stdout = &buf
+	cmd.Stderr = &buf
 	if err := cmd.Start(); err != nil {
-		return err
+		return nil, err
 	}
 	if err := cmd.Wait(); err != nil {
+		return nil, err
+	}
+	return &buf, nil
+}
+
+func (v *varnishExporter) queryVersion() error {
+	buf, err := v.executeVarnishstat("-V")
+	if err != nil {
 		return err
 	}
 	scanner := bufio.NewScanner(buf)
@@ -159,21 +168,6 @@ func (v *varnishExporter) Update() error {
 		}
 	}
 	return nil
-}
-
-// Returns the result of 'varnishtat' with optional command line params.
-func (v *varnishExporter) executeVarnishstat(params ...string) (*bytes.Buffer, error) {
-	buf := bytes.Buffer{}
-	cmd := exec.Command(varnishstatExe, params...)
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
-	if err := cmd.Start(); err != nil {
-		return nil, err
-	}
-	if err := cmd.Wait(); err != nil {
-		return nil, err
-	}
-	return &buf, nil
 }
 
 // Initial query at startup to resolve available metrics.

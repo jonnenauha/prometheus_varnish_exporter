@@ -209,8 +209,6 @@ func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric, version *v
 			Namespace: pe.namespace,
 			Name:      pm.Name,
 			Help:      m.Description,
-			// @todo Put varnish version number here or should it be its own metric?
-			//ConstLabels: prometheus.Labels{"type": pm.Group},
 		}
 
 		if labelNames := pm.LabelNames(); len(labelNames) > 0 {

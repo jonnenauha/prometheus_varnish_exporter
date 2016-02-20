@@ -92,10 +92,8 @@ var (
 			"vbe.",
 			// varnish 4.x
 			"main.backend_",
-			"main.s_fetch",
 			// varnish 3.x
 			"backend_",
-			"main.s_fetch",
 		}},
 		group{name: "mempool", prefixes: []string{
 			"mempool.",
@@ -117,7 +115,8 @@ var (
 )
 
 const (
-	fq_main_fetch = exporterNamespace + "_main_fetch"
+	fq_main_fetch       = exporterNamespace + "_main_fetch"
+	fq_main_fetch_total = exporterNamespace + "_main_s_fetch"
 )
 
 // https://prometheus.io/docs/practices/naming/
@@ -160,12 +159,16 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 			}
 		}
 		// name grouping bt moving part of the fq name as a label
-		if startsWith(name, fq_main_fetch+"_", caseSensitive) {
+		if name == fq_main_fetch_total {
+			labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, "total")
+			name, description = fq_main_fetch, "Number of fetches"
+		} else if startsWith(name, fq_main_fetch+"_", caseSensitive) {
 			// If name is manipulated to be the same for multiple metrics
 			// the description needs to match as well.
-			labelKeys, labelValues = append(labelKeys, "code"), append(labelValues, name[len(fq_main_fetch)+1:])
-			name, description = fq_main_fetch, "Number of backend fetches"
+			labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, name[len(fq_main_fetch)+1:])
+			name, description = fq_main_fetch, "Number of fetches"
 		}
+
 	}
 	return name, description, labelKeys, labelValues
 }

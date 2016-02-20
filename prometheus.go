@@ -34,11 +34,13 @@ func NewPrometheusMetric(m *varnishMetric) *prometheusMetric {
 	return pm
 }
 
+// Set value.
 func (p *prometheusMetric) Set(value float64) {
 	p.Value = value
 	p.Gauge().Set(p.Value)
 }
 
+// Reset underlying gauge.
 func (p *prometheusMetric) Reset() {
 	if p.gaugeVec != nil {
 		p.gaugeVec.Reset()
@@ -47,6 +49,7 @@ func (p *prometheusMetric) Reset() {
 	}
 }
 
+// Get underlying gauge.
 func (p *prometheusMetric) Gauge() prometheus.Gauge {
 	if p.gaugeVec != nil {
 		return p.gaugeVec.With(p.labels)
@@ -55,6 +58,7 @@ func (p *prometheusMetric) Gauge() prometheus.Gauge {
 	}
 }
 
+// Get labels as a string.
 func (p *prometheusMetric) Labels() string {
 	if len(p.labels) > 0 {
 		return prettyPrintsMap(p.labels)
@@ -62,9 +66,10 @@ func (p *prometheusMetric) Labels() string {
 	return ""
 }
 
+// Returns label keys or nil if not defined.
+// @note Due to golang map range the returned list may be in different order
+// on each invocation. Don't assume order when using the list.
 func (p *prometheusMetric) LabelNames() []string {
-	// cache so these will be calculated once and the order
-	// does not change depending on map range
 	var names []string
 	for name := range p.labels {
 		names = append(names, name)
@@ -148,7 +153,7 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	for _, pMetric := range pe.metrics {
 		pMetric.Reset()
 	}
-	// update values
+	// update values, if no errors on scrape
 	if err == nil {
 		for _, pMetric := range pe.metrics {
 			if vMetric := VarnishExporter.metricsByName[pMetric.NameVarnish]; vMetric != nil {

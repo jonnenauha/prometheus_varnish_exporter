@@ -19,7 +19,7 @@ var (
 	VarnishExporter    = NewVarnishExporter()
 
 	StartParams = &startParams{
-		Host: "0.0.0.0",
+		Host: "",
 		Port: 9102,
 		Path: "/metrics",
 	}

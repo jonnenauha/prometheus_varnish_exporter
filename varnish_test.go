@@ -70,8 +70,11 @@ backend_unhealthy              Backend conn. not attempted`),
 	listResults := []int{9, 8}
 
 	for i, list := range lists {
-		var exporter varnishExporter
-		if err := exporter.parseMetricsList(bytes.NewBuffer(list)); err != nil {
+		var (
+			exporter varnishExporter
+			err      error
+		)
+		if exporter.metrics, err = exporter.parseMetricsList(bytes.NewBuffer(list)); err != nil {
 			t.Error(err.Error())
 			continue
 		}
@@ -85,7 +88,7 @@ backend_unhealthy              Backend conn. not attempted`),
 			}
 		}
 		if !t.Failed() {
-			t.Logf("varnishstat -l > %d OK", i)
+			t.Logf("varnishstat -l: %d OK with %d metrics", i, len(exporter.metrics))
 		}
 	}
 
@@ -149,8 +152,11 @@ backend_unhealthy              Backend conn. not attempted`),
 	listResults = []int{7, 11}
 
 	for i, json_ := range jsons {
-		var exporter varnishExporter
-		if err := exporter.parseMetrics(bytes.NewBuffer(json_)); err != nil {
+		var (
+			exporter varnishExporter
+			err      error
+		)
+		if exporter.metrics, err = exporter.parseMetrics(bytes.NewBuffer(json_)); err != nil {
 			t.Error(err.Error())
 			continue
 		}
@@ -164,7 +170,7 @@ backend_unhealthy              Backend conn. not attempted`),
 			}
 		}
 		if !t.Failed() {
-			t.Logf("varnishstat -j > %d OK", i)
+			t.Logf("varnishstat -j: %d OK with %d metrics", i, len(exporter.metrics))
 		}
 	}
 }

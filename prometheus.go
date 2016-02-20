@@ -2,24 +2,11 @@ package main
 
 import (
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
-
-var (
-	PrometheusExporter = NewPrometheusExporter()
-)
-
-type PrometheusMetricsbyGroup []*prometheusMetric
-
-func (a PrometheusMetricsbyGroup) Len() int      { return len(a) }
-func (a PrometheusMetricsbyGroup) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a PrometheusMetricsbyGroup) Less(i, j int) bool {
-	if a[i].Group != a[j].Group {
-		return a[i].Group < a[j].Group
-	}
-	return a[i].Name < a[j].Name
-}
 
 // prometheusMetric
 
@@ -30,8 +17,42 @@ type prometheusMetric struct {
 	Description string
 	Group       string
 
-	gauge  *prometheus.GaugeVec
-	labels prometheus.Labels
+	gaugeVec *prometheus.GaugeVec
+	gauge    prometheus.Gauge
+	labels   prometheus.Labels
+}
+
+func NewPrometheusMetric(m *varnishMetric) *prometheusMetric {
+	pm := &prometheusMetric{
+		NameVarnish: m.Name,
+		Name:        fullPrometheusMetricName(m),
+		Value:       m.Value,
+		Description: m.Description,
+		Group:       prometheusGroup(m),
+	}
+	pm.labels = prometheusLabels(pm, m)
+	return pm
+}
+
+func (p *prometheusMetric) Set(value float64) {
+	p.Value = value
+	p.Gauge().Set(p.Value)
+}
+
+func (p *prometheusMetric) Reset() {
+	if p.gaugeVec != nil {
+		p.gaugeVec.Reset()
+	} else {
+		p.gauge.Set(0)
+	}
+}
+
+func (p *prometheusMetric) Gauge() prometheus.Gauge {
+	if p.gaugeVec != nil {
+		return p.gaugeVec.With(p.labels)
+	} else {
+		return p.gauge
+	}
 }
 
 func (p *prometheusMetric) Labels() string {
@@ -39,6 +60,19 @@ func (p *prometheusMetric) Labels() string {
 		return prettyPrintsMap(p.labels)
 	}
 	return ""
+}
+
+func (p *prometheusMetric) LabelNames() []string {
+	// cache so these will be calculated once and the order
+	// does not change depending on map range
+	var names []string
+	for name := range p.labels {
+		names = append(names, name)
+	}
+	if len(names) == 0 {
+		return nil
+	}
+	return names
 }
 
 // prometheusExporter
@@ -49,6 +83,8 @@ type prometheusExporter struct {
 
 	up                          prometheus.Gauge
 	totalScrapes, failedScrapes prometheus.Counter
+
+	mutex sync.RWMutex
 }
 
 func NewPrometheusExporter() *prometheusExporter {
@@ -74,99 +110,164 @@ func NewPrometheusExporter() *prometheusExporter {
 	}
 }
 
-func (p *prometheusExporter) exposeMetrics(metrics []*varnishMetric) error {
-	p.metrics = make([]*prometheusMetric, 0)
+// Implements prometheus.Collector
+func (pe *prometheusExporter) Describe(ch chan<- *prometheus.Desc) {
+	if StartParams.Verbose {
+		defer func(start time.Time) {
+			logInfo("prometheus.Collector.Describe  %s", time.Now().Sub(start))
+		}(time.Now())
+	}
+
+	for _, m := range pe.metrics {
+		m.Gauge().Describe(ch)
+	}
+	ch <- pe.up.Desc()
+	ch <- pe.totalScrapes.Desc()
+	ch <- pe.failedScrapes.Desc()
+}
+
+// Implements prometheus.Collector
+func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
+	if StartParams.Verbose {
+		defer func(start time.Time) {
+			logInfo("prometheus.Collector.Collect   %s", time.Now().Sub(start))
+		}(time.Now())
+	}
+
+	pe.totalScrapes.Inc()
+	pe.up.Set(1)
+
+	// scrape
+	err := VarnishExporter.Update()
+	if err != nil {
+		pe.up.Set(0)
+		pe.failedScrapes.Inc()
+	}
+
+	// reset
+	for _, pMetric := range pe.metrics {
+		pMetric.Reset()
+	}
+	// update values
+	if err == nil {
+		for _, pMetric := range pe.metrics {
+			if vMetric := VarnishExporter.metricsByName[pMetric.NameVarnish]; vMetric != nil {
+				pMetric.Set(vMetric.Value)
+			}
+		}
+	}
+	// collect
+	for _, pMetric := range pe.metrics {
+		pMetric.Gauge().Collect(ch)
+	}
+	ch <- pe.up
+	ch <- pe.totalScrapes
+	ch <- pe.failedScrapes
+}
+
+func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric) error {
+	pe.metrics = make([]*prometheusMetric, 0)
 
 	for _, m := range metrics {
-		pm := &prometheusMetric{
-			NameVarnish: m.Name,
-			Name:        cleanPrometheusMetricName(m),
-			Value:       m.Value,
-			Description: m.Description,
-			Group:       prometheusGroup(m),
-			labels:      prometheusExtraLabels(m),
+		pm := NewPrometheusMetric(m)
+		opts := prometheus.GaugeOpts{
+			Namespace: pe.namespace,
+			Name:      pm.Name,
+			Help:      m.Description,
+			// @todo Put varnish version number here or should it be its own metric
+			//ConstLabels: prometheus.Labels{"type": pm.Group},
 		}
-		pm.gauge = prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Namespace:   p.namespace,
-				Name:        pm.Name,
-				Help:        m.Description,
-				ConstLabels: pm.labels,
-			},
-			[]string{pm.Group},
-		)
-		p.metrics = append(p.metrics, pm)
+
+		if labelNames := pm.LabelNames(); len(labelNames) > 0 {
+			pm.gaugeVec = prometheus.NewGaugeVec(opts, labelNames)
+		} else {
+			pm.gauge = prometheus.NewGauge(opts)
+		}
+		pe.metrics = append(pe.metrics, pm)
 	}
 	return nil
 }
 
 // https://prometheus.io/docs/practices/naming/
-func cleanPrometheusMetricName(metric *varnishMetric) string {
+func fullPrometheusMetricName(metric *varnishMetric) string {
 	clean := strings.ToLower(metric.Name)
+	// Remove unique identifiers from name to group similar metrics into a single GaugeVec
 	if len(metric.Identifier) > 0 {
 		clean = strings.Replace(clean, "."+strings.ToLower(metric.Identifier), "", -1)
 	}
-	return strings.Replace(clean, ".", "_", -1)
+	// Make sure our group name is prefixed only once
+	return prometheusGroup(metric) + "_" + strings.Replace(prometheusGroupTrim(clean), ".", "_", -1)
+}
+
+type group struct {
+	name     string
+	prefixes []string
 }
 
 var (
-	// @note varnish 3.x does not seem to mark 'MAIN.' prefixes
-	backendLabelPrefixes = []string{
-		"VBE.",
-		// varnish 4.x
-		"MAIN.backend_",
-		"MAIN.n_backend",
-		"MAIN.s_fetch",
-		// varnish 3.x
-		"backend_",
-		"n_backend",
-		"MAIN.s_fetch",
-	}
-	mempoolLabelPrefixes = []string{
-		"MEMPOOL.",
-	}
-	lockLabelPrefixes = []string{
-		"LCK.",
-	}
-	memLabelPrefixes = []string{
-		"SMA.",
-	}
-	managementLabelPrefixes = []string{
-		"MGT.",
+	groups = []group{
+		// @note varnish 3.x does not seem to mark 'MAIN.' prefixes
+		group{name: "backend", prefixes: []string{
+			"VBE.",
+			// varnish 4.x
+			"MAIN.backend_",
+			"MAIN.s_fetch",
+			// varnish 3.x
+			"backend_",
+			"MAIN.s_fetch",
+		}},
+		group{name: "mempool", prefixes: []string{
+			"MEMPOOL.",
+		}},
+		group{name: "lck", prefixes: []string{
+			"LCK.",
+		}},
+		group{name: "sma", prefixes: []string{
+			"SMA.",
+		}},
+		group{name: "mgt", prefixes: []string{
+			"MGT.",
+		}},
+		// must be last so other groups have time to override
+		group{name: "main", prefixes: []string{
+			"MAIN.",
+		}},
 	}
 )
 
+func prometheusGroupTrim(name string) string {
+	for _, group := range groups {
+		for _, prefix := range group.prefixes {
+			if startsWith(name, prefix, caseInsensitive) {
+				return name[len(prefix):]
+			}
+		}
+	}
+	return name
+}
+
 // Always returns at least one main label
 func prometheusGroup(metric *varnishMetric) string {
-	if startsWithAny(metric.Name, backendLabelPrefixes, caseSensitive) {
-		return "backend"
-	} else if startsWithAny(metric.Name, mempoolLabelPrefixes, caseSensitive) {
-		return "mempool"
-	} else if startsWithAny(metric.Name, lockLabelPrefixes, caseSensitive) {
-		return "lock"
-	} else if startsWithAny(metric.Name, memLabelPrefixes, caseSensitive) {
-		return "memory"
-	} else if startsWithAny(metric.Name, managementLabelPrefixes, caseSensitive) {
-		return "management"
+	for _, group := range groups {
+		if startsWithAny(metric.Name, group.prefixes, caseInsensitive) {
+			return group.name
+		}
 	}
 	return "main"
 }
 
-var (
-	fetchLabelPostfixes = []string{
-		"fetch_1xx",
-		"fetch_204",
-		"fetch_304",
-	}
-)
-
-func prometheusExtraLabels(metric *varnishMetric) prometheus.Labels {
+// @note may modify input ptrs if finds a GaugeVec grouping pattern
+func prometheusLabels(pMetric *prometheusMetric, metric *varnishMetric) prometheus.Labels {
 	labels := make(prometheus.Labels)
 	if len(metric.Identifier) > 0 {
 		labels["ident"] = metric.Identifier
 	}
-	if endsWithAny(metric.Name, fetchLabelPostfixes, caseSensitive) {
-		labels["code"] = metric.Name[len(metric.Name)-3:]
+	if startsWith(pMetric.Name, "main_fetch_", caseSensitive) {
+		// If name is manipulated to be the same for multiple metrics
+		// the description needs to match as well.
+		labels["code"] = pMetric.Name[len("main_fetch_"):]
+		pMetric.Name = "main_fetch"
+		metric.Description = "Number of backend fetches"
 	}
 	if len(labels) == 0 {
 		return nil

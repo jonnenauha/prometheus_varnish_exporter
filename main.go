@@ -5,35 +5,50 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 var (
+	PrometheusExporter = NewPrometheusExporter()
+	VarnishExporter    = NewVarnishExporter()
+
 	StartParams = &startParams{
 		Host: "0.0.0.0",
 		Port: 9102,
+		Path: "/metrics",
 	}
 	logger *log.Logger
 )
 
 type startParams struct {
-	Host string
-	Port int
-	Test bool
-	Raw  bool
+	Host    string
+	Port    int
+	Path    string
+	Verbose bool
+	Test    bool
+	Raw     bool
 }
 
 func init() {
 	flag.StringVar(&StartParams.Host, "host", StartParams.Host, "HTTP server host")
 	flag.IntVar(&StartParams.Port, "port", StartParams.Port, "HTTP server port")
+	flag.StringVar(&StartParams.Path, "path", StartParams.Path, "HTTP server path that exposes metrics")
+	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits")
-	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging, no timestamps")
+	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps")
 	flag.Parse()
 
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
+
+	if len(StartParams.Path) == 0 || StartParams.Path[0] != '/' {
+		logFatal("-path cannot be empty and must start with a slash '/', given %q", StartParams.Path)
+	}
 }
 
 func main() {
@@ -43,22 +58,17 @@ func main() {
 		logFatal(err.Error())
 	}
 
-	if err := VarnishExporter.queryVersion(); err != nil {
-		logFatal("Querying version failed: %s", err.Error())
-	}
-
 	t := time.Now()
-	if err := VarnishExporter.queryMetrics(); err != nil {
-		logFatal("Querying metrics failed: %s", err.Error())
+	if err := VarnishExporter.Initialize(); err != nil {
+		logFatal("VarnishExporter initialize failed: %s", err.Error())
 	}
-	logInfo("Queried %d metrics from %s %s in %s\n\n", len(VarnishExporter.metrics), varnishstatExe, VarnishExporter.version, time.Now().Sub(t).String())
+	logInfo("Initialized %d metrics from %s %s in %s\n\n", len(VarnishExporter.metrics), varnishstatExe, VarnishExporter.version, time.Now().Sub(t).String())
 
 	if err := PrometheusExporter.exposeMetrics(VarnishExporter.metrics); err != nil {
 		logFatal("Exposing metrics failed: %s", err.Error())
 	}
 
 	if StartParams.Test {
-		// pretty print based on group
 		metricsByGroup := make(PrometheusMetricsbyGroup, len(VarnishExporter.metrics))
 		for i, m := range PrometheusExporter.metrics {
 			metricsByGroup[i] = m
@@ -87,55 +97,25 @@ func main() {
 				logInfo(" %s", m.NameVarnish[vSplit:])
 			}
 		}
-		os.Exit(1)
+
+		t = time.Now()
+		if errUpdate := VarnishExporter.Update(); errUpdate == nil {
+			logInfo("Executed values update in %s", time.Now().Sub(t))
+		} else {
+			logFatal("VarnishExporter.Update: %s", errUpdate.Error())
+		}
 	}
-}
 
-func logRaw(format string, args ...interface{}) {
-	fmt.Printf(format+"\n", args...)
-}
+	prometheus.MustRegister(PrometheusExporter)
 
-func logTitle(format string, args ...interface{}) {
-	logInfo(format, args...)
-
-	title := strings.Repeat("-", len(fmt.Sprintf(format, args...)))
-	if len(title) > 0 {
-		logInfo(title)
+	if StartParams.Test {
+		os.Exit(0)
 	}
-}
 
-func logInfo(format string, args ...interface{}) {
-	if StartParams.Raw {
-		logRaw(format, args...)
-	} else {
-		logger.Printf(format, args...)
-	}
-}
+	// Start serving
+	listenAddress := fmt.Sprintf("%s:%d", StartParams.Host, StartParams.Port)
+	logInfo("Server starting on %s", listenAddress)
 
-func logWarn(format string, args ...interface{}) {
-	format = "[WARN] " + format
-	if StartParams.Raw {
-		logRaw(format, args...)
-	} else {
-		logger.Printf(format, args...)
-	}
-}
-
-func logError(format string, args ...interface{}) {
-	format = "[ERROR] " + format
-	if StartParams.Raw {
-		logRaw(format, args...)
-	} else {
-		logger.Printf(format, args...)
-	}
-}
-
-func logFatal(format string, args ...interface{}) {
-	format = "[FATAL] " + format
-	if StartParams.Raw {
-		logRaw(format, args...)
-	} else {
-		logger.Printf(format, args...)
-	}
-	os.Exit(1)
+	http.Handle(StartParams.Path, prometheus.Handler())
+	logFatalError(http.ListenAndServe(listenAddress, nil))
 }

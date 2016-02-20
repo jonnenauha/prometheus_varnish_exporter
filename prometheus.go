@@ -148,7 +148,7 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 		}(time.Now())
 	}
 
-	// scrape: this is a blocking operation and is safe for concurrent use.
+	// scrape: this is a blocking operation and is safe for concurrent use (mutex inside).
 	err := VarnishExporter.Update()
 
 	pe.up.Set(1)
@@ -164,7 +164,7 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 		pMetric.Reset()
 	}
 
-	// lock below state for value updated, anything above is guarded.
+	// lock below state for value updates, anything above is guarded.
 	pe.Lock()
 	defer pe.Unlock()
 

@@ -198,8 +198,8 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 				fqNewName = exporterNamespace + "_" + grouping.newPrefix
 			}
 			if name == fqTotal {
-				labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, "total")
-				name, description = fqNewName, grouping.desc
+				// @note total should not be a label as it breaks aggregation
+				name, description = fqNewName+"_total", grouping.desc
 				break
 			} else if len(name) > len(fqPrefix)+1 && strings.HasPrefix(name, fqPrefix+"_") {
 				labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, name[len(fqPrefix)+1:])

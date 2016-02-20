@@ -233,47 +233,6 @@ func (v *varnishExporter) parseMetrics(r io.Reader) ([]*varnishMetric, error) {
 	return metrics, nil
 }
 
-// @note deprecated in favor of JSON queries, might make a helpful library however if exported one day
-func (v *varnishExporter) queryMetricsList() ([]*varnishMetric, error) {
-	buf, err := v.executeVarnishstat("-l")
-	if err != nil {
-		return nil, err
-	}
-	return v.parseMetricsList(buf)
-}
-
-// @note deprecated in favor of JSON queries, might make a helpful library however if exported one day
-func (v *varnishExporter) parseMetricsList(r io.Reader) ([]*varnishMetric, error) {
-	scanner := bufio.NewScanner(r)
-
-	ignoredLinesPrefixes := []string{
-		"varnishstat",
-		"field name",
-		"-----",
-	}
-
-	var metrics []*varnishMetric
-	for scanner.Scan() {
-		line := scanner.Text()
-		if len(line) == 0 || startsWithAny(line, ignoredLinesPrefixes, caseInsensitive) {
-			continue
-		}
-		if parts := strings.SplitAfterN(line, " ", 2); len(parts) == 2 {
-			m := &varnishMetric{
-				Name:        strings.TrimSpace(parts[0]),
-				Description: strings.TrimSpace(parts[1]),
-			}
-			metrics = append(metrics, m)
-		} else {
-			logWarn("Found invalid metrics line: %q", line)
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return metrics, nil
-}
-
 // varnishVersion
 
 type varnishVersion struct {

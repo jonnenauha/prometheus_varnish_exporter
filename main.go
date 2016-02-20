@@ -16,9 +16,10 @@ var (
 	VarnishVersion     = NewVarnishVersion()
 
 	StartParams = &startParams{
-		Host: "",
-		Port: 9102,
-		Path: "/metrics",
+		Host:   "",
+		Port:   9102,
+		Path:   "/metrics",
+		Params: &varnishstatParams{},
 	}
 	logger *log.Logger
 )
@@ -27,15 +28,39 @@ type startParams struct {
 	Host    string
 	Port    int
 	Path    string
+	Params  *varnishstatParams
 	Verbose bool
 	Test    bool
 	Raw     bool
+}
+
+type varnishstatParams struct {
+	Instance string
+	VSM      string
+}
+
+func (p *varnishstatParams) isEmpty() bool {
+	return p.Instance == "" && p.VSM == ""
+}
+
+func (p *varnishstatParams) make() (params []string) {
+	// -n
+	if p.Instance != "" {
+		params = append(params, "-n", p.Instance)
+	}
+	// -N is not supported by 3.x
+	if p.VSM != "" && VarnishVersion != nil && VarnishVersion.Major >= 4 {
+		params = append(params, "-N", p.VSM)
+	}
+	return params
 }
 
 func init() {
 	flag.StringVar(&StartParams.Host, "host", StartParams.Host, "HTTP server host")
 	flag.IntVar(&StartParams.Port, "port", StartParams.Port, "HTTP server port")
 	flag.StringVar(&StartParams.Path, "path", StartParams.Path, "HTTP server path that exposes metrics")
+	flag.StringVar(&StartParams.Params.Instance, "instance", StartParams.Params.VSM, "instance name (varnishstat -n)")
+	flag.StringVar(&StartParams.Params.VSM, "vsm", StartParams.Params.VSM, "VSM instance filename (varnishstat -N)")
 	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps")

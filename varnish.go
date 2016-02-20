@@ -25,7 +25,16 @@ var (
 )
 
 func scrapeVarnish(ch chan<- prometheus.Metric) error {
-	buf, errExec := executeVarnishstat("-j")
+	params := []string{"-j"}
+	if VarnishVersion.Major >= 4 {
+		// timeout to not hang for a long time if instance is not found.
+		// Varnish 3.x exits immediately on faulty params
+		params = append(params, "-t", "2")
+	}
+	if !StartParams.Params.isEmpty() {
+		params = append(params, StartParams.Params.make()...)
+	}
+	buf, errExec := executeVarnishstat(params...)
 	if errExec != nil {
 		return errExec
 	}

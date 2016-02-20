@@ -19,6 +19,23 @@ const (
 	varnishstatExe = "varnishstat"
 )
 
+// Utils
+
+// Returns the result of 'varnishtat' with optional command line params.
+func ExecuteVarnishstat(params ...string) (*bytes.Buffer, error) {
+	buf := bytes.Buffer{}
+	cmd := exec.Command(varnishstatExe, params...)
+	cmd.Stdout = &buf
+	cmd.Stderr = &buf
+	if err := cmd.Start(); err != nil {
+		return nil, err
+	}
+	if err := cmd.Wait(); err != nil {
+		return nil, err
+	}
+	return &buf, nil
+}
+
 // varnishMetric
 
 type varnishMetric struct {
@@ -34,14 +51,12 @@ type varnishMetric struct {
 type varnishExporter struct {
 	sync.RWMutex
 
-	version       *varnishVersion
 	metrics       []*varnishMetric
 	metricsByName map[string]*varnishMetric
 }
 
 func NewVarnishExporter() *varnishExporter {
 	return &varnishExporter{
-		version:       NewVarnishVersion(),
 		metricsByName: make(map[string]*varnishMetric),
 	}
 }
@@ -53,59 +68,11 @@ func (v *varnishExporter) MetricByName(name string) *varnishMetric {
 	return m
 }
 
-// Returns the result of 'varnishtat' with optional command line params.
-func (v *varnishExporter) executeVarnishstat(params ...string) (*bytes.Buffer, error) {
-	buf := bytes.Buffer{}
-	cmd := exec.Command(varnishstatExe, params...)
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
-	if err := cmd.Start(); err != nil {
-		return nil, err
-	}
-	if err := cmd.Wait(); err != nil {
-		return nil, err
-	}
-	return &buf, nil
-}
-
-func (v *varnishExporter) queryVersion() error {
-	buf, err := v.executeVarnishstat("-V")
-	if err != nil {
-		return err
-	}
-	scanner := bufio.NewScanner(buf)
-	for scanner.Scan() {
-		return v.parseVersion(scanner.Text())
-	}
-	return nil
-}
-
-func (v *varnishExporter) parseVersion(version string) error {
-	if v.version == nil {
-		v.version = NewVarnishVersion()
-	}
-	r := regexp.MustCompile(`(\d)\.?(\d)?\.?(\d)?(?:.*revision\s(.*)\))?`)
-	parts := r.FindStringSubmatch(version)
-	if len(parts) > 1 {
-		if err := v.version.set(parts[1:]); err != nil {
-			return err
-		}
-	}
-	if !v.version.isValid() {
-		return fmt.Errorf("Failed to resolve version from %q", version)
-	}
-	return nil
-}
-
 // Initializes exporter.
-func (v *varnishExporter) Initialize() error {
+func (v *varnishExporter) Initialize() (err error) {
 	v.Lock()
 	defer v.Unlock()
 
-	err := v.queryVersion()
-	if err != nil {
-		return err
-	}
 	v.metrics, err = v.queryMetrics()
 	if err == nil && len(v.metrics) == 0 {
 		return fmt.Errorf("No metrics found from %s output", varnishstatExe)
@@ -129,7 +96,7 @@ func (v *varnishExporter) Update() error {
 	if len(v.metrics) == 0 {
 		return errors.New("varnishExporter.Collect: no metrics to update")
 	}
-	buf, err := v.executeVarnishstat("-j")
+	buf, err := ExecuteVarnishstat("-j")
 	if err != nil {
 		return err
 	}
@@ -171,7 +138,7 @@ func (v *varnishExporter) Update() error {
 
 // Initial query at startup to resolve available metrics.
 func (v *varnishExporter) queryMetrics() ([]*varnishMetric, error) {
-	buf, err := v.executeVarnishstat("-j")
+	buf, err := ExecuteVarnishstat("-j")
 	if err != nil {
 		return nil, err
 	}
@@ -236,31 +203,61 @@ func (v *varnishExporter) parseMetrics(r io.Reader) ([]*varnishMetric, error) {
 // varnishVersion
 
 type varnishVersion struct {
-	major    int
-	minor    int
-	patch    int
-	revision string
+	Major    int
+	Minor    int
+	Patch    int
+	Revision string
 }
 
 func NewVarnishVersion() *varnishVersion {
 	return &varnishVersion{
-		major: -1, minor: -1, patch: -1,
+		Major: -1, Minor: -1, Patch: -1,
 	}
+}
+
+func (v *varnishVersion) Initialize() error {
+	return v.queryVersion()
+}
+
+func (v *varnishVersion) queryVersion() error {
+	buf, err := ExecuteVarnishstat("-V")
+	if err != nil {
+		return err
+	}
+	scanner := bufio.NewScanner(buf)
+	for scanner.Scan() {
+		return v.parseVersion(scanner.Text())
+	}
+	return nil
+}
+
+func (v *varnishVersion) parseVersion(version string) error {
+	r := regexp.MustCompile(`(\d)\.?(\d)?\.?(\d)?(?:.*revision\s(.*)\))?`)
+	parts := r.FindStringSubmatch(version)
+	if len(parts) > 1 {
+		if err := v.set(parts[1:]); err != nil {
+			return err
+		}
+	}
+	if !v.isValid() {
+		return fmt.Errorf("Failed to resolve version from %q", version)
+	}
+	return nil
 }
 
 func (v *varnishVersion) Labels() map[string]string {
 	labels := make(map[string]string)
-	if v.major != -1 {
-		labels["major"] = strconv.Itoa(v.major)
+	if v.Major != -1 {
+		labels["major"] = strconv.Itoa(v.Major)
 	}
-	if v.minor != -1 {
-		labels["minor"] = strconv.Itoa(v.minor)
+	if v.Minor != -1 {
+		labels["minor"] = strconv.Itoa(v.Minor)
 	}
-	if v.patch != -1 {
-		labels["patch"] = strconv.Itoa(v.patch)
+	if v.Patch != -1 {
+		labels["patch"] = strconv.Itoa(v.Patch)
 	}
-	if v.revision != "" {
-		labels["revision"] = v.revision
+	if v.Revision != "" {
+		labels["revision"] = v.Revision
 	}
 	labels["version"] = v.VersionString()
 	return labels
@@ -272,7 +269,7 @@ func (v *varnishVersion) set(parts []string) error {
 			continue
 		}
 		if i == 3 {
-			v.revision = part
+			v.Revision = part
 			break
 		}
 		num, err := strconv.Atoi(part)
@@ -281,24 +278,24 @@ func (v *varnishVersion) set(parts []string) error {
 		}
 		switch i {
 		case 0:
-			v.major = num
+			v.Major = num
 		case 1:
-			v.minor = num
+			v.Minor = num
 		case 2:
-			v.patch = num
+			v.Patch = num
 		}
 	}
 	return nil
 }
 
 func (v *varnishVersion) isValid() bool {
-	return v.major != -1
+	return v.Major != -1
 }
 
 // Version string with numbers only, no revision.
 func (v *varnishVersion) VersionString() string {
 	parts := []string{}
-	for _, num := range []int{v.major, v.minor, v.patch} {
+	for _, num := range []int{v.Major, v.Minor, v.Patch} {
 		if num != -1 {
 			parts = append(parts, strconv.Itoa(num))
 		}
@@ -309,8 +306,8 @@ func (v *varnishVersion) VersionString() string {
 // Full version string, including revision.
 func (v *varnishVersion) String() string {
 	version := v.VersionString()
-	if v.revision != "" {
-		version += " " + v.revision
+	if v.Revision != "" {
+		version += " " + v.Revision
 	}
 	return version
 }

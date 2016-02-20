@@ -9,32 +9,32 @@ import (
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{
 		"varnishstat (varnish-4.1.0 revision 3041728)": &varnishVersion{
-			major: 4, minor: 1, patch: 0, revision: "3041728",
+			Major: 4, Minor: 1, Patch: 0, Revision: "3041728",
 		},
 		"varnishstat (varnish-4 revision)": &varnishVersion{
-			major: 4, minor: -1, patch: -1,
+			Major: 4, Minor: -1, Patch: -1,
 		},
 		"varnishstat (varnish-3.0.5 revision 1a89b1f)": &varnishVersion{
-			major: 3, minor: 0, patch: 5, revision: "1a89b1f",
+			Major: 3, Minor: 0, Patch: 5, Revision: "1a89b1f",
 		},
 		"varnish 1.0": &varnishVersion{
-			major: 1, minor: 0, patch: -1,
+			Major: 1, Minor: 0, Patch: -1,
 		},
 	}
 	for versionStr, test := range tests {
-		var exporter varnishExporter
-		if err := exporter.parseVersion(versionStr); err != nil {
+		var v varnishVersion
+		if err := v.parseVersion(versionStr); err != nil {
 			t.Error(err.Error())
 			continue
 		}
-		if test.major != exporter.version.major ||
-			test.minor != exporter.version.minor ||
-			test.patch != exporter.version.patch ||
-			test.revision != exporter.version.revision {
+		if test.Major != v.Major ||
+			test.Minor != v.Minor ||
+			test.Patch != v.Patch ||
+			test.Revision != v.Revision {
 			t.Errorf("version mismatch on %q", versionStr)
 			continue
 		}
-		t.Logf("%q > %s\n", versionStr, exporter.version.String())
+		t.Logf("%q > %s\n", versionStr, v.String())
 	}
 }
 
@@ -198,7 +198,7 @@ func Test_VarnishMetrics(t *testing.T) {
 			importer = NewPrometheusExporter()
 			err      error
 		)
-		exporter.version.major = versions[i]
+		Varnish.Version.Major = versions[i]
 
 		if exporter.metrics, err = exporter.parseMetrics(bytes.NewBuffer(json_)); err != nil {
 			t.Error(err.Error())
@@ -213,7 +213,7 @@ func Test_VarnishMetrics(t *testing.T) {
 				t.Errorf("Failed to parse metric name/desc: %#v", m)
 			}
 		}
-		if err = importer.exposeMetrics(exporter.metrics, exporter.version); err == nil {
+		if err = importer.exposeMetrics(exporter.metrics); err == nil {
 			dumpMetrics(importer)
 			fmt.Println(" ")
 		} else {

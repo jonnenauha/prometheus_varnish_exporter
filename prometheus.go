@@ -22,7 +22,7 @@ type prometheusMetric struct {
 	labels   prometheus.Labels
 }
 
-func NewPrometheusMetric(m *varnishMetric, v *varnishVersion) *prometheusMetric {
+func NewPrometheusMetric(m *varnishMetric) *prometheusMetric {
 	pm := &prometheusMetric{
 		NameVarnish: m.Name,
 		Name:        fullPrometheusMetricName(m),
@@ -30,7 +30,7 @@ func NewPrometheusMetric(m *varnishMetric, v *varnishVersion) *prometheusMetric 
 		Description: m.Description,
 		Group:       prometheusGroup(m),
 	}
-	pm.labels = prometheusLabels(pm, m, v)
+	pm.labels = prometheusLabels(pm, m)
 	return pm
 }
 
@@ -154,7 +154,7 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	// scrape
-	err := VarnishExporter.Update()
+	err := Varnish.Exporter.Update()
 
 	// status
 	if err == nil {
@@ -173,7 +173,7 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	// update values, if no errors on scrape
 	if err == nil {
 		for _, pMetric := range pe.metrics {
-			if vMetric := VarnishExporter.MetricByName(pMetric.NameVarnish); vMetric != nil {
+			if vMetric := Varnish.Exporter.MetricByName(pMetric.NameVarnish); vMetric != nil {
 				pMetric.Set(vMetric.Value)
 			}
 		}
@@ -188,27 +188,23 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	ch <- pe.failedScrapes
 }
 
-func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric, version *varnishVersion) error {
+func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric) error {
 	pe.Lock()
 	defer pe.Unlock()
 
 	// version: value always set to 1
-	if version != nil {
-		pe.version = prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace:   pe.namespace,
-			Name:        "version",
-			Help:        "Varnish version information",
-			ConstLabels: version.Labels(),
-		})
-		pe.version.Set(1)
-	} else {
-		logFatal("exposeMetrics: Version info is nil")
-	}
+	pe.version = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace:   pe.namespace,
+		Name:        "version",
+		Help:        "Varnish version information",
+		ConstLabels: Varnish.Version.Labels(),
+	})
+	pe.version.Set(1)
 
 	pe.metrics = make([]*prometheusMetric, 0)
 
 	for _, m := range metrics {
-		pm := NewPrometheusMetric(m, version)
+		pm := NewPrometheusMetric(m)
 		opts := prometheus.GaugeOpts{
 			Namespace: pe.namespace,
 			Name:      pm.Name,
@@ -294,18 +290,18 @@ func prometheusGroup(metric *varnishMetric) string {
 }
 
 // @note may modify input ptrs if finds a GaugeVec grouping pattern
-func prometheusLabels(pMetric *prometheusMetric, metric *varnishMetric, v *varnishVersion) prometheus.Labels {
+func prometheusLabels(pMetric *prometheusMetric, metric *varnishMetric) prometheus.Labels {
 	labels := make(prometheus.Labels)
 	if len(metric.Identifier) > 0 {
-		if isVBE := startsWith(metric.Name, "VBE.", caseSensitive); isVBE && v != nil {
+		if isVBE := startsWith(metric.Name, "VBE.", caseSensitive); isVBE {
 			// @todo this is quick and dirty, do regexp?
-			if v.major == 4 {
+			if Varnish.Version.Major == 4 {
 				// <uuid>.<name>
 				if len(metric.Identifier) > 37 && metric.Identifier[8] == '-' && metric.Identifier[36] == '.' {
 					labels["ident"] = metric.Identifier[0:36]
 					labels["backend"] = metric.Identifier[37:]
 				}
-			} else if v.major == 3 {
+			} else if Varnish.Version.Major == 3 {
 				// <name>(<ip>,<something>,<port>)
 				iStart, iEnd := strings.Index(metric.Identifier, "("), strings.Index(metric.Identifier, ")")
 				if iStart > 0 && iEnd > 1 && iStart < iEnd {

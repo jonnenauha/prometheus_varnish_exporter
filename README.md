@@ -21,7 +21,7 @@ go get github.com/jonnenauha/prometheus_varnish_exporter
 $GOPATH/bin/prometheus_varnish_exporter -h
 ```
 
-# Dryrun
+# Test mode
 
 To test that `varnishstat` is found on the host machine and to preview all exported metrics run
 

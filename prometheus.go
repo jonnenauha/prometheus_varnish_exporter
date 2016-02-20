@@ -114,9 +114,38 @@ var (
 	}
 )
 
-const (
-	fq_main_fetch       = exporterNamespace + "_main_fetch"
-	fq_main_fetch_total = exporterNamespace + "_main_s_fetch"
+type grouping struct {
+	newPrefix string
+	prefix    string
+	total     string
+	desc      string
+}
+
+var (
+	fqGroupPrefixes = []*grouping{
+		&grouping{
+			prefix: "main_fetch",
+			total:  "main_s_fetch",
+			desc:   "Number of fetches",
+		},
+		&grouping{
+			prefix: "main_sess",
+			total:  "main_s_sess",
+			desc:   "Number of sessions",
+		},
+		&grouping{
+			newPrefix: "main_worker_threads",
+			prefix:    "main_n_wrk",
+			total:     "main_n_wrk",
+			desc:      "Number of worker threads",
+		},
+		&grouping{
+			newPrefix: "main_bans",
+			prefix:    "main_n_ban",
+			total:     "main_n_ban",
+			desc:      "Number of bans",
+		},
+	}
 )
 
 // https://prometheus.io/docs/practices/naming/
@@ -158,17 +187,25 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 				labelKeys, labelValues = append(labelKeys, "id"), append(labelValues, vIdentifier)
 			}
 		}
-		// name grouping bt moving part of the fq name as a label
-		if name == fq_main_fetch_total {
-			labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, "total")
-			name, description = fq_main_fetch, "Number of fetches"
-		} else if startsWith(name, fq_main_fetch+"_", caseSensitive) {
-			// If name is manipulated to be the same for multiple metrics
-			// the description needs to match as well.
-			labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, name[len(fq_main_fetch)+1:])
-			name, description = fq_main_fetch, "Number of fetches"
-		}
 
+		// create groupings by moving part of the fq name as a label and optional total
+		for _, grouping := range fqGroupPrefixes {
+			fqTotal := exporterNamespace + "_" + grouping.total
+			fqPrefix := exporterNamespace + "_" + grouping.prefix
+			fqNewName := fqPrefix
+			if len(grouping.newPrefix) > 0 {
+				fqNewName = exporterNamespace + "_" + grouping.newPrefix
+			}
+			if name == fqTotal {
+				labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, "total")
+				name, description = fqNewName, grouping.desc
+				break
+			} else if len(name) > len(fqPrefix)+1 && strings.HasPrefix(name, fqPrefix+"_") {
+				labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, name[len(fqPrefix)+1:])
+				name, description = fqNewName, grouping.desc
+				break
+			}
+		}
 	}
 	return name, description, labelKeys, labelValues
 }

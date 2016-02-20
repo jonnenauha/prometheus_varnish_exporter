@@ -119,6 +119,7 @@ type grouping struct {
 	prefix    string
 	total     string
 	desc      string
+	labelKey  string
 }
 
 var (
@@ -145,7 +146,27 @@ var (
 			prefix:    "main_n_ban",
 			total:     "main_n_ban",
 			desc:      "Number of bans",
+			labelKey:  "action",
 		},
+	}
+	fqNames = map[string]string{
+		"varnish_lck_colls":   "varnish_lock_collisions",
+		"varnish_lck_creat":   "varnish_lock_created",
+		"varnish_lck_destroy": "varnish_lock_destroyed",
+		"varnish_lck_locks":   "varnish_lock_operations",
+	}
+	fqIdentifiers = map[string]string{
+		"varnish_lock_collisions": "target",
+		"varnish_lock_created":    "target",
+		"varnish_lock_destroyed":  "target",
+		"varnish_lock_operations": "target",
+		"varnish_sma_c_bytes":     "type",
+		"varnish_sma_c_fail":      "type",
+		"varnish_sma_c_freed":     "type",
+		"varnish_sma_c_req":       "type",
+		"varnish_sma_g_alloc":     "type",
+		"varnish_sma_g_bytes":     "type",
+		"varnish_sma_g_space":     "type",
 	}
 )
 
@@ -162,6 +183,9 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 		fq = prometheusTrimGroupPrefix(fq)
 		// Build fq name
 		name = exporterNamespace + "_" + vGroup + "_" + strings.Replace(fq, ".", "_", -1)
+		if swapName := fqNames[name]; len(swapName) > 0 {
+			name = swapName
+		}
 		description = vDescription
 	}
 	// labels: can alter final name and description
@@ -185,7 +209,11 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 				}
 			}
 			if len(labelKeys) == 0 {
-				labelKeys, labelValues = append(labelKeys, "id"), append(labelValues, vIdentifier)
+				labelKey := fqIdentifiers[name]
+				if len(labelKey) == 0 {
+					labelKey = "id"
+				}
+				labelKeys, labelValues = append(labelKeys, labelKey), append(labelValues, vIdentifier)
 			}
 		}
 
@@ -202,7 +230,11 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 				name, description = fqNewName+"_total", grouping.desc
 				break
 			} else if len(name) > len(fqPrefix)+1 && strings.HasPrefix(name, fqPrefix+"_") {
-				labelKeys, labelValues = append(labelKeys, "type"), append(labelValues, name[len(fqPrefix)+1:])
+				labelKey := "type"
+				if len(grouping.labelKey) > 0 {
+					labelKey = grouping.labelKey
+				}
+				labelKeys, labelValues = append(labelKeys, labelKey), append(labelValues, name[len(fqPrefix)+1:])
 				name, description = fqNewName, grouping.desc
 				break
 			}

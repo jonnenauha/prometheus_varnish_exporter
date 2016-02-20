@@ -129,9 +129,10 @@ var (
 			desc:   "Number of fetches",
 		},
 		&grouping{
-			prefix: "main_sess",
-			total:  "main_s_sess",
-			desc:   "Number of sessions",
+			newPrefix: "main_sessions",
+			prefix:    "main_sess",
+			total:     "main_s_sess",
+			desc:      "Number of sessions",
 		},
 		&grouping{
 			newPrefix: "main_worker_threads",

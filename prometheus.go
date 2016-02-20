@@ -22,7 +22,7 @@ type prometheusMetric struct {
 	labels   prometheus.Labels
 }
 
-func NewPrometheusMetric(m *varnishMetric) *prometheusMetric {
+func NewPrometheusMetric(m *varnishMetric, v *varnishVersion) *prometheusMetric {
 	pm := &prometheusMetric{
 		NameVarnish: m.Name,
 		Name:        fullPrometheusMetricName(m),
@@ -30,7 +30,7 @@ func NewPrometheusMetric(m *varnishMetric) *prometheusMetric {
 		Description: m.Description,
 		Group:       prometheusGroup(m),
 	}
-	pm.labels = prometheusLabels(pm, m)
+	pm.labels = prometheusLabels(pm, m, v)
 	return pm
 }
 
@@ -193,18 +193,22 @@ func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric, version *v
 	defer pe.Unlock()
 
 	// version: value always set to 1
-	pe.version = prometheus.NewGauge(prometheus.GaugeOpts{
-		Namespace:   pe.namespace,
-		Name:        "version",
-		Help:        "Varnish version information",
-		ConstLabels: version.Labels(),
-	})
-	pe.version.Set(1)
+	if version != nil {
+		pe.version = prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace:   pe.namespace,
+			Name:        "version",
+			Help:        "Varnish version information",
+			ConstLabels: version.Labels(),
+		})
+		pe.version.Set(1)
+	} else {
+		logFatal("exposeMetrics: Version info is nil")
+	}
 
 	pe.metrics = make([]*prometheusMetric, 0)
 
 	for _, m := range metrics {
-		pm := NewPrometheusMetric(m)
+		pm := NewPrometheusMetric(m, version)
 		opts := prometheus.GaugeOpts{
 			Namespace: pe.namespace,
 			Name:      pm.Name,
@@ -290,10 +294,29 @@ func prometheusGroup(metric *varnishMetric) string {
 }
 
 // @note may modify input ptrs if finds a GaugeVec grouping pattern
-func prometheusLabels(pMetric *prometheusMetric, metric *varnishMetric) prometheus.Labels {
+func prometheusLabels(pMetric *prometheusMetric, metric *varnishMetric, v *varnishVersion) prometheus.Labels {
 	labels := make(prometheus.Labels)
 	if len(metric.Identifier) > 0 {
-		labels["ident"] = metric.Identifier
+		if isVBE := startsWith(metric.Name, "VBE.", caseSensitive); isVBE && v != nil {
+			// @todo this is quick and dirty, do regexp?
+			if v.major == 4 {
+				// <uuid>.<name>
+				if len(metric.Identifier) > 37 && metric.Identifier[8] == '-' && metric.Identifier[36] == '.' {
+					labels["ident"] = metric.Identifier[0:36]
+					labels["backend"] = metric.Identifier[37:]
+				}
+			} else if v.major == 3 {
+				// <name>(<ip>,<something>,<port>)
+				iStart, iEnd := strings.Index(metric.Identifier, "("), strings.Index(metric.Identifier, ")")
+				if iStart > 0 && iEnd > 1 && iStart < iEnd {
+					labels["ident"] = metric.Identifier[iStart+1 : iEnd]
+					labels["backend"] = metric.Identifier[0:iStart]
+				}
+			}
+		}
+		if labels["ident"] == "" {
+			labels["ident"] = metric.Identifier
+		}
 	}
 	if startsWith(pMetric.Name, "main_fetch_", caseSensitive) {
 		// If name is manipulated to be the same for multiple metrics

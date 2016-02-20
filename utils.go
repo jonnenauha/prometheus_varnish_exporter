@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -113,4 +114,35 @@ func endsWithAny(str string, postfixes []string, cs caseSensitivity) bool {
 		}
 	}
 	return false
+}
+
+func dumpMetrics(exporter *prometheusExporter) {
+	metricsByGroup := make(PrometheusMetricsbyGroup, len(exporter.metrics))
+	for i, m := range exporter.metrics {
+		metricsByGroup[i] = m
+	}
+	sort.Sort(metricsByGroup)
+
+	logTitle("%-23s %-8s %-23s %-15s %-10s   %-11s", "Varnish Name", "Group", "Name", "Labels", "Value", "Description")
+	for _, m := range metricsByGroup {
+		vName := m.NameVarnish
+		vSplit := 22
+		if len(m.NameVarnish) > vSplit {
+			if idx := strings.Index(vName, "."); idx != -1 && idx+1 < vSplit {
+				vSplit = idx + 1
+			}
+			vName = vName[0:vSplit]
+		}
+		logInfo("%-23s %-8s %-23s %-15s %10.0f   %s",
+			vName,
+			m.Group,
+			m.Name,
+			m.Labels(),
+			m.Value,
+			m.Description,
+		)
+		if len(m.NameVarnish) > vSplit {
+			logInfo(" %s", m.NameVarnish[vSplit:])
+		}
+	}
 }

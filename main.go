@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sort"
-	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -69,34 +67,7 @@ func main() {
 	}
 
 	if StartParams.Test {
-		metricsByGroup := make(PrometheusMetricsbyGroup, len(VarnishExporter.metrics))
-		for i, m := range PrometheusExporter.metrics {
-			metricsByGroup[i] = m
-		}
-		sort.Sort(metricsByGroup)
-
-		logTitle("%-23s %-8s %-23s %-15s %-10s   %-11s", "Varnish Name", "Group", "Name", "Labels", "Value", "Description")
-		for _, m := range metricsByGroup {
-			vName := m.NameVarnish
-			vSplit := 22
-			if len(m.NameVarnish) > vSplit {
-				if idx := strings.Index(vName, "."); idx != -1 && idx+1 < vSplit {
-					vSplit = idx + 1
-				}
-				vName = vName[0:vSplit]
-			}
-			logInfo("%-23s %-8s %-23s %-15s %10.0f   %s",
-				vName,
-				m.Group,
-				m.Name,
-				m.Labels(),
-				m.Value,
-				m.Description,
-			)
-			if len(m.NameVarnish) > vSplit {
-				logInfo(" %s", m.NameVarnish[vSplit:])
-			}
-		}
+		dumpMetrics(PrometheusExporter)
 
 		t = time.Now()
 		if errUpdate := VarnishExporter.Update(); errUpdate == nil {

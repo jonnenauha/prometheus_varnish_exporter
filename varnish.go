@@ -46,6 +46,13 @@ func NewVarnishExporter() *varnishExporter {
 	}
 }
 
+func (v *varnishExporter) MetricByName(name string) *varnishMetric {
+	v.RLock()
+	m := v.metricsByName[name]
+	v.RUnlock()
+	return m
+}
+
 // Returns the result of 'varnishtat' with optional command line params.
 func (v *varnishExporter) executeVarnishstat(params ...string) (*bytes.Buffer, error) {
 	buf := bytes.Buffer{}

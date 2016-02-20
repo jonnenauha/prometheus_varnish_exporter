@@ -144,36 +144,36 @@ func (pe *prometheusExporter) Describe(ch chan<- *prometheus.Desc) {
 
 // Implements prometheus.Collector
 func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
+	pe.Lock()
+	defer pe.Unlock()
+
 	if StartParams.Verbose {
 		defer func(start time.Time) {
 			logInfo("prometheus.Collector.Collect   %s", time.Now().Sub(start))
 		}(time.Now())
 	}
 
-	// scrape: this is a blocking operation and is safe for concurrent use (mutex inside).
+	// scrape
 	err := VarnishExporter.Update()
 
-	pe.up.Set(1)
-	pe.totalScrapes.Inc()
-
-	if err != nil {
+	// status
+	if err == nil {
+		pe.up.Set(1)
+	} else {
 		pe.up.Set(0)
 		pe.failedScrapes.Inc()
 	}
+	pe.totalScrapes.Inc()
 
 	// reset
 	for _, pMetric := range pe.metrics {
 		pMetric.Reset()
 	}
 
-	// lock below state for value updates, anything above is guarded.
-	pe.Lock()
-	defer pe.Unlock()
-
 	// update values, if no errors on scrape
 	if err == nil {
 		for _, pMetric := range pe.metrics {
-			if vMetric := VarnishExporter.metricsByName[pMetric.NameVarnish]; vMetric != nil {
+			if vMetric := VarnishExporter.MetricByName(pMetric.NameVarnish); vMetric != nil {
 				pMetric.Set(vMetric.Value)
 			}
 		}

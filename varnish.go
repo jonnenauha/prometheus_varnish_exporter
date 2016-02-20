@@ -282,6 +282,24 @@ func NewVarnishVersion() *varnishVersion {
 	}
 }
 
+func (v *varnishVersion) Labels() map[string]string {
+	labels := make(map[string]string)
+	if v.major != -1 {
+		labels["major"] = strconv.Itoa(v.major)
+	}
+	if v.minor != -1 {
+		labels["minor"] = strconv.Itoa(v.minor)
+	}
+	if v.patch != -1 {
+		labels["patch"] = strconv.Itoa(v.patch)
+	}
+	if v.revision != "" {
+		labels["revision"] = v.revision
+	}
+	labels["version"] = v.VersionString()
+	return labels
+}
+
 func (v *varnishVersion) set(parts []string) error {
 	for i, part := range parts {
 		if len(part) == 0 {
@@ -311,14 +329,20 @@ func (v *varnishVersion) isValid() bool {
 	return v.major != -1
 }
 
-func (v *varnishVersion) String() string {
+// Version string with numbers only, no revision.
+func (v *varnishVersion) VersionString() string {
 	parts := []string{}
 	for _, num := range []int{v.major, v.minor, v.patch} {
 		if num != -1 {
 			parts = append(parts, strconv.Itoa(num))
 		}
 	}
-	version := strings.Join(parts, ".")
+	return strings.Join(parts, ".")
+}
+
+// Full version string, including revision.
+func (v *varnishVersion) String() string {
+	version := v.VersionString()
 	if v.revision != "" {
 		version += " " + v.revision
 	}

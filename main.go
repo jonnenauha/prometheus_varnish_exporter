@@ -64,7 +64,7 @@ func main() {
 	}
 	logInfo("Initialized %d metrics from %s %s in %s\n\n", len(VarnishExporter.metrics), varnishstatExe, VarnishExporter.version, time.Now().Sub(t).String())
 
-	if err := PrometheusExporter.exposeMetrics(VarnishExporter.metrics); err != nil {
+	if err := PrometheusExporter.exposeMetrics(VarnishExporter.metrics, VarnishExporter.version); err != nil {
 		logFatal("Exposing metrics failed: %s", err.Error())
 	}
 

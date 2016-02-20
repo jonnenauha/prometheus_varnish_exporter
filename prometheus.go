@@ -98,6 +98,7 @@ type prometheusExporter struct {
 	metrics   []*prometheusMetric
 
 	up                          prometheus.Gauge
+	version                     prometheus.Gauge
 	totalScrapes, failedScrapes prometheus.Counter
 }
 
@@ -136,6 +137,7 @@ func (pe *prometheusExporter) Describe(ch chan<- *prometheus.Desc) {
 		m.Gauge().Describe(ch)
 	}
 	ch <- pe.up.Desc()
+	ch <- pe.version.Desc()
 	ch <- pe.totalScrapes.Desc()
 	ch <- pe.failedScrapes.Desc()
 }
@@ -181,13 +183,23 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 		pMetric.Gauge().Collect(ch)
 	}
 	ch <- pe.up
+	ch <- pe.version
 	ch <- pe.totalScrapes
 	ch <- pe.failedScrapes
 }
 
-func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric) error {
+func (pe *prometheusExporter) exposeMetrics(metrics []*varnishMetric, version *varnishVersion) error {
 	pe.Lock()
 	defer pe.Unlock()
+
+	// version: value always set to 1
+	pe.version = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace:   pe.namespace,
+		Name:        "version",
+		Help:        "Varnish version information",
+		ConstLabels: version.Labels(),
+	})
+	pe.version.Set(1)
 
 	pe.metrics = make([]*prometheusMetric, 0)
 

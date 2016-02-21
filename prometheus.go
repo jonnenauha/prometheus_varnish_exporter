@@ -63,7 +63,7 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	pe.Lock()
 	defer pe.Unlock()
 
-	if err := scrapeVarnish(ch); err == nil {
+	if _, err := scrapeVarnish(ch); err == nil {
 		pe.up.Set(1)
 	} else {
 		logError(err.Error())

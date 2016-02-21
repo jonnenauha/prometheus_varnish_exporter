@@ -24,7 +24,7 @@ var (
 	mDescCache sync.RWMutex
 )
 
-func scrapeVarnish(ch chan<- prometheus.Metric) error {
+func scrapeVarnish(ch chan<- prometheus.Metric) (*bytes.Buffer, error) {
 	params := []string{"-j"}
 	if VarnishVersion.Major >= 4 {
 		// timeout to not hang for a long time if instance is not found.
@@ -36,13 +36,13 @@ func scrapeVarnish(ch chan<- prometheus.Metric) error {
 	}
 	buf, errExec := executeVarnishstat(params...)
 	if errExec != nil {
-		return errExec
+		return buf, errExec
 	}
 	// The output JSON annoyingly is not stuctured so that we could make a nice map[string]struct for it.
 	metricsJSON := make(map[string]interface{})
 	dec := json.NewDecoder(buf)
 	if err := dec.Decode(&metricsJSON); err != nil {
-		return err
+		return buf, err
 	}
 
 	// This is a bit broad but better than locking on each desc query below.
@@ -110,7 +110,7 @@ func scrapeVarnish(ch chan<- prometheus.Metric) error {
 		}
 		ch <- prometheus.MustNewConstMetric(pDesc, prometheus.GaugeValue, vValue, pLabelValues...)
 	}
-	return nil
+	return buf, nil
 }
 
 // Returns the result of 'varnishtat' with optional command line params.
@@ -120,10 +120,10 @@ func executeVarnishstat(params ...string) (*bytes.Buffer, error) {
 	cmd.Stdout = &buf
 	cmd.Stderr = &buf
 	if err := cmd.Start(); err != nil {
-		return nil, err
+		return &buf, err
 	}
 	if err := cmd.Wait(); err != nil {
-		return nil, err
+		return &buf, err
 	}
 	return &buf, nil
 }

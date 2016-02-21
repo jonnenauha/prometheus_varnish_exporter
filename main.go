@@ -87,23 +87,32 @@ func main() {
 	if err := VarnishVersion.Initialize(); err != nil {
 		logFatal("Varnish version initialize failed: %s", err.Error())
 	}
+	logInfo("Found varnishstat %s", VarnishVersion)
 	if err := PrometheusExporter.Initialize(); err != nil {
 		logFatal("Prometheus exporter initialize failed: %s", err.Error())
 	}
 
-	// Test mode
-	if StartParams.Test {
+	// Test to verify everything is ok before starting the server
+	{
 		metrics := make(chan prometheus.Metric)
 		go func() {
 			for m := range metrics {
-				logInfo("%s", m.Desc())
+				if StartParams.Test {
+					logInfo("%s", m.Desc())
+				}
 			}
 		}()
 		tStart := time.Now()
-		logFatalError(scrapeVarnish(metrics))
+		if buf, err := scrapeVarnish(metrics); err != nil {
+			logRaw("\n%s\n", buf.Bytes())
+			logFatal("Test scrape failed: %s", err.Error())
+		}
 		close(metrics)
 		logInfo("Test scrape done in %s", time.Now().Sub(tStart))
-		os.Exit(0)
+		logRaw("")
+	}
+	if StartParams.Test {
+		return
 	}
 
 	// Start serving

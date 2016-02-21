@@ -26,7 +26,7 @@ var (
 
 func scrapeVarnish(ch chan<- prometheus.Metric) (*bytes.Buffer, error) {
 	params := []string{"-j"}
-	if VarnishVersion.Major >= 4 {
+	if VarnishVersion.Major >= 4 && VarnishVersion.Minor >= 1 {
 		// timeout to not hang for a long time if instance is not found.
 		// Varnish 3.x exits immediately on faulty params
 		params = append(params, "-t", "2")

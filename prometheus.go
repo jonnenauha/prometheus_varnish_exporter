@@ -187,13 +187,13 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 		if len(vIdentifier) > 0 {
 			if isVBE := startsWith(vName, "VBE.", caseSensitive); isVBE {
 				// @todo this is quick and dirty, do regexp?
-				if VarnishVersion.Major == 4 {
+				if VarnishVersion.Major == 4 && VarnishVersion.Minor >= 1 {
 					// <uuid>.<name>
 					if len(vIdentifier) > 37 && vIdentifier[8] == '-' && vIdentifier[36] == '.' {
 						labelKeys, labelValues = append(labelKeys, "server"), append(labelValues, vIdentifier[0:36])
 						labelKeys, labelValues = append(labelKeys, "backend"), append(labelValues, vIdentifier[37:])
 					}
-				} else if VarnishVersion.Major == 3 {
+				} else {
 					// <name>(<ip>,<something>,<port>)
 					iStart, iEnd := strings.Index(vIdentifier, "("), strings.Index(vIdentifier, ")")
 					if iStart > 0 && iEnd > 1 && iStart < iEnd {

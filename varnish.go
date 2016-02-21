@@ -108,7 +108,11 @@ func scrapeVarnish(ch chan<- prometheus.Metric) error {
 			)
 			descCache[descKey] = pDesc
 		}
-		ch <- prometheus.MustNewConstMetric(pDesc, prometheus.GaugeValue, vValue, pLabelValues...)
+		valueType := prometheus.GaugeValue
+		if swapValueType, ok := fqMetricType[pName]; ok {
+			valueType = swapValueType
+		}
+		ch <- prometheus.MustNewConstMetric(pDesc, valueType, vValue, pLabelValues...)
 	}
 	return nil
 }

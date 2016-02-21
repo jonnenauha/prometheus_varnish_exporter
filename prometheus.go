@@ -87,13 +87,8 @@ type group struct {
 
 var (
 	groups = []group{
-		// @note varnish 3.x does not seem to mark 'MAIN.' prefixes
 		group{name: "backend", prefixes: []string{
 			"vbe.",
-			// varnish 4.x
-			"main.backend_",
-			// varnish 3.x
-			"backend_",
 		}},
 		group{name: "mempool", prefixes: []string{
 			"mempool.",
@@ -107,7 +102,6 @@ var (
 		group{name: "mgt", prefixes: []string{
 			"mgt.",
 		}},
-		// must be last so above groups have a opportunity to override
 		group{name: "main", prefixes: []string{
 			"main.",
 		}},
@@ -167,6 +161,10 @@ var (
 		"varnish_sma_g_alloc":     "type",
 		"varnish_sma_g_bytes":     "type",
 		"varnish_sma_g_space":     "type",
+	}
+	fqMetricType = map[string]prometheus.ValueType{
+		"varnish_main_fetch":  prometheus.CounterValue,
+		"varnish_backend_req": prometheus.CounterValue,
 	}
 )
 

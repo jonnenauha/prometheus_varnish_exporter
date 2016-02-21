@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,22 +15,20 @@ var (
 	VarnishVersion     = NewVarnishVersion()
 
 	StartParams = &startParams{
-		Host:   "",
-		Port:   9102,
-		Path:   "/metrics",
-		Params: &varnishstatParams{},
+		ListenAddress: ":9131", // Reserved and publicly announced at https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+		Path:          "/metrics",
+		Params:        &varnishstatParams{},
 	}
 	logger *log.Logger
 )
 
 type startParams struct {
-	Host    string
-	Port    int
-	Path    string
-	Params  *varnishstatParams
-	Verbose bool
-	Test    bool
-	Raw     bool
+	ListenAddress string
+	Path          string
+	Params        *varnishstatParams
+	Verbose       bool
+	Test          bool
+	Raw           bool
 }
 
 type varnishstatParams struct {
@@ -56,14 +53,19 @@ func (p *varnishstatParams) make() (params []string) {
 }
 
 func init() {
-	flag.StringVar(&StartParams.Host, "host", StartParams.Host, "HTTP server host")
-	flag.IntVar(&StartParams.Port, "port", StartParams.Port, "HTTP server port")
-	flag.StringVar(&StartParams.Path, "path", StartParams.Path, "HTTP server path that exposes metrics")
-	flag.StringVar(&StartParams.Params.Instance, "n", StartParams.Params.VSM, "varnishstat -n value")
-	flag.StringVar(&StartParams.Params.VSM, "N", StartParams.Params.VSM, "varnishstat -N value")
-	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging")
-	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits")
-	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps")
+	// prometheus conventions
+	flag.StringVar(&StartParams.ListenAddress, "web.listen-address", StartParams.ListenAddress, "Address on which to expose metrics and web interface.")
+	flag.StringVar(&StartParams.Path, "web.telemetry-path", StartParams.Path, "Path under which to expose metrics.")
+
+	// varnish
+	flag.StringVar(&StartParams.Params.Instance, "n", StartParams.Params.VSM, "varnishstat -n value.")
+	flag.StringVar(&StartParams.Params.VSM, "N", StartParams.Params.VSM, "varnishstat -N value.")
+
+	// modes
+	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging.")
+	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
+	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
+
 	flag.Parse()
 
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
@@ -102,11 +104,19 @@ func main() {
 	}
 
 	// Start serving
-	listenAddress := fmt.Sprintf("%s:%d", StartParams.Host, StartParams.Port)
-	logInfo("Server starting on %s", listenAddress)
+	logInfo("Server starting on %s with metrics path %s", StartParams.ListenAddress, StartParams.Path)
 
 	prometheus.MustRegister(PrometheusExporter)
 
+	// 400 Bad Request for anything except the configured metrics path.
+	// If you want to make the path obscure to hide it from snooping while still exposing
+	// it to the public web, you don't want to show some "go here instead" message at root etc.
+	if StartParams.Path != "/" {
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusBadRequest)
+		})
+	}
+	// metrics
 	http.Handle(StartParams.Path, prometheus.Handler())
-	logFatalError(http.ListenAndServe(listenAddress, nil))
+	logFatalError(http.ListenAndServe(StartParams.ListenAddress, nil))
 }

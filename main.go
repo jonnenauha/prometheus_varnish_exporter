@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -98,8 +99,10 @@ func main() {
 				logInfo("%s", m.Desc())
 			}
 		}()
+		tStart := time.Now()
 		logFatalError(scrapeVarnish(metrics))
 		close(metrics)
+		logInfo("Test scrape done in %s", time.Now().Sub(tStart))
 		os.Exit(0)
 	}
 

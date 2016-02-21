@@ -58,7 +58,7 @@ func init() {
 	flag.StringVar(&StartParams.Path, "web.telemetry-path", StartParams.Path, "Path under which to expose metrics.")
 
 	// varnish
-	flag.StringVar(&StartParams.Params.Instance, "n", StartParams.Params.VSM, "varnishstat -n value.")
+	flag.StringVar(&StartParams.Params.Instance, "n", StartParams.Params.Instance, "varnishstat -n value.")
 	flag.StringVar(&StartParams.Params.VSM, "N", StartParams.Params.VSM, "varnishstat -N value.")
 
 	// modes

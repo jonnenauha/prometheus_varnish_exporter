@@ -162,10 +162,6 @@ var (
 		"varnish_sma_g_bytes":     "type",
 		"varnish_sma_g_space":     "type",
 	}
-	fqMetricType = map[string]prometheus.ValueType{
-		"varnish_main_fetch":  prometheus.CounterValue,
-		"varnish_backend_req": prometheus.CounterValue,
-	}
 )
 
 // https://prometheus.io/docs/practices/naming/

@@ -1,2 +1,4 @@
 prometheus_varnish_exporter
 prometheus_varnish_exporter.exe
+build/
+.idea/

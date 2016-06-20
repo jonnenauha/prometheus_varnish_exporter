@@ -43,3 +43,7 @@ I'd be interested in Grafana dahsboard .json exports or Prometheus queries you m
     
     // Free memory (malloc allocator)
     varnish_sma_g_space{type="s0"}
+
+# Build
+Build binaries for crossplatform.
+`./build.sh`

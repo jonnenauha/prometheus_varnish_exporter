@@ -14,14 +14,13 @@ I won't make any backwards compatibility promises at this point. Your built quer
 
 # Installing and running
 
-    go get github.com/jonnenauha/prometheus_varnish_exporter
-    $GOPATH/bin/prometheus_varnish_exporter -h
+You can find the latest binary releases for linux, darwin, windows, freebsd, openbsd and netbsd  from the [github releases page](https://github.com/jonnenauha/prometheus_varnish_exporter/releases).
 
-# Test mode
+See `prometheus_varnish_exporter -h` for available options.
 
 To test that `varnishstat` is found on the host machine and to preview all exported metrics run
 
-    $GOPATH/bin/prometheus_varnish_exporter -test
+    prometheus_varnish_exporter -test
 
 # Grafana examples
 
@@ -45,5 +44,5 @@ I'd be interested in Grafana dahsboard .json exports or Prometheus queries you m
     varnish_sma_g_space{type="s0"}
 
 # Build
-Build binaries for crossplatform.
-`./build.sh`
+
+Use `go build` or `./build.sh` for cross compilation.

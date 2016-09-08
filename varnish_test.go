@@ -60,7 +60,7 @@ func Test_VarnishMetrics(t *testing.T) {
 			t.Logf("%s", m.Desc())
 		}
 	}()
-	if err := scrapeVarnish(metrics); err != nil {
+	if _, err := scrapeVarnish(metrics); err != nil {
 		t.Skipf("Host machine needs varnishstat to be able to run tests: %s", err.Error())
 	}
 	close(metrics)

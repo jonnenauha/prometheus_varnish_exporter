@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,11 @@ import (
 )
 
 var (
+	ApplicationName = "prometheus_varnish_exporter"
+	Version         string
+	VersionHash     string
+	VersionDate     string
+
 	PrometheusExporter = NewPrometheusExporter()
 	VarnishVersion     = NewVarnishVersion()
 
@@ -63,11 +69,18 @@ func init() {
 	flag.StringVar(&StartParams.Params.VSM, "N", StartParams.Params.VSM, "varnishstat -N value.")
 
 	// modes
+	version := false
+	flag.BoolVar(&version, "version", version, "Print version and exit")
 	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging.")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
 
 	flag.Parse()
+
+	if version {
+		fmt.Printf("%s %s\n", ApplicationName, getVersion(true))
+		os.Exit(0)
+	}
 
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
@@ -78,7 +91,7 @@ func init() {
 
 func main() {
 	if b, err := json.MarshalIndent(StartParams, "", "  "); err == nil {
-		logInfo("Starting up %s", b)
+		logInfo("%s %s %s", ApplicationName, getVersion(false), b)
 	} else {
 		logFatal(err.Error())
 	}
@@ -131,4 +144,15 @@ func main() {
 	// metrics
 	http.Handle(StartParams.Path, prometheus.Handler())
 	logFatalError(http.ListenAndServe(StartParams.ListenAddress, nil))
+}
+
+func getVersion(date bool) (version string) {
+	if Version == "" {
+		return "dev"
+	}
+	version = fmt.Sprintf("v%s (%s)", Version, VersionHash)
+	if date {
+		version += " " + VersionDate
+	}
+	return version
 }

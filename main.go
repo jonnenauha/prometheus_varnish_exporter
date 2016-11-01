@@ -92,6 +92,9 @@ func init() {
 	if len(StartParams.HealthPath) != 0 && StartParams.HealthPath[0] != '/' {
 		logFatal("-web.health-path must start with a slash '/' if configured, given %q", StartParams.Path)
 	}
+	if StartParams.Path == StartParams.HealthPath {
+		logFatal("-web.telemetry.path and -web.health-path cannot have same value")
+	}
 }
 
 func main() {

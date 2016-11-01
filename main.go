@@ -32,6 +32,7 @@ var (
 type startParams struct {
 	ListenAddress string
 	Path          string
+	HealthPath    string
 	Params        *varnishstatParams
 	Verbose       bool
 	Test          bool
@@ -63,6 +64,7 @@ func init() {
 	// prometheus conventions
 	flag.StringVar(&StartParams.ListenAddress, "web.listen-address", StartParams.ListenAddress, "Address on which to expose metrics and web interface.")
 	flag.StringVar(&StartParams.Path, "web.telemetry-path", StartParams.Path, "Path under which to expose metrics.")
+	flag.StringVar(&StartParams.HealthPath, "web.health-path", StartParams.HealthPath, "Path under which to expose healthcheck. Disabled unless configured.")
 
 	// varnish
 	flag.StringVar(&StartParams.Params.Instance, "n", StartParams.Params.Instance, "varnishstat -n value.")
@@ -86,6 +88,9 @@ func init() {
 
 	if len(StartParams.Path) == 0 || StartParams.Path[0] != '/' {
 		logFatal("-path cannot be empty and must start with a slash '/', given %q", StartParams.Path)
+	}
+	if len(StartParams.HealthPath) != 0 && StartParams.HealthPath[0] != '/' {
+		logFatal("-web.health-path must start with a slash '/' if configured, given %q", StartParams.Path)
 	}
 }
 
@@ -133,12 +138,20 @@ func main() {
 
 	prometheus.MustRegister(PrometheusExporter)
 
-	// 400 Bad Request for anything except the configured metrics path.
+	// 400 Bad Request for anything except the configured metrics path, or health if configured.
 	// If you want to make the path obscure to hide it from snooping while still exposing
 	// it to the public web, you don't want to show some "go here instead" message at root etc.
 	if StartParams.Path != "/" {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
+		})
+	}
+	if StartParams.HealthPath != "" {
+		http.HandleFunc(StartParams.HealthPath, func(w http.ResponseWriter, r *http.Request) {
+			// As noted in the "up" metric, needs some way to determine if everything is actually Ok.
+			// For now, this just lets us check that we're accepting connections
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintln(w, "Ok")
 		})
 	}
 	// metrics

@@ -87,13 +87,13 @@ func init() {
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	if len(StartParams.Path) == 0 || StartParams.Path[0] != '/' {
-		logFatal("-path cannot be empty and must start with a slash '/', given %q", StartParams.Path)
+		logFatal("-web.telemetry-path cannot be empty and must start with a slash '/', given %q", StartParams.Path)
 	}
 	if len(StartParams.HealthPath) != 0 && StartParams.HealthPath[0] != '/' {
 		logFatal("-web.health-path must start with a slash '/' if configured, given %q", StartParams.Path)
 	}
 	if StartParams.Path == StartParams.HealthPath {
-		logFatal("-web.telemetry.path and -web.health-path cannot have same value")
+		logFatal("-web.telemetry-path and -web.health-path cannot have same value")
 	}
 }
 

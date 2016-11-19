@@ -5,7 +5,7 @@ set -e
 rm -rf bin
 mkdir -p bin/release
 
-VERSION="1.1"
+VERSION="1.2"
 VERSION_HASH="$(git rev-parse --short HEAD)"
 VERSION_DATE="$(date -u '+%d.%m.%Y %H:%M:%S')"
 

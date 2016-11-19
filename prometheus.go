@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -164,6 +165,35 @@ var (
 	}
 )
 
+var (
+	// (prefix:)<uuid>.<name>
+	regexBackendUUID = regexp.MustCompile(`([[0-9A-Za-z]{8}-[0-9A-Za-z]{4}-[0-9A-Za-z]{4}-[89ABab][0-9A-Za-z]{3}-[0-9A-Za-z]{12})(.*)`)
+	// <name>(<ip>,(<something>),<port>)
+	regexBackendParen = regexp.MustCompile(`(.*)\((.*)\)`)
+)
+
+func findLabelValue(name string, keys, values []string) string {
+	for i, key := range keys {
+		if key == name {
+			if i < len(values) {
+				return values[i]
+			}
+			return ""
+		}
+	}
+	return ""
+}
+
+func cleanBackendName(name string) string {
+	name = strings.Trim(name, ".")
+	for _, prefix := range []string{"boot.", "root:"} {
+		if startsWith(name, prefix, caseInsensitive) {
+			name = name[len(prefix):]
+		}
+	}
+	return name
+}
+
 // https://prometheus.io/docs/practices/naming/
 func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (name, description string, labelKeys, labelValues []string) {
 	// name and description
@@ -186,20 +216,18 @@ func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (nam
 	{
 		if len(vIdentifier) > 0 {
 			if isVBE := startsWith(vName, "VBE.", caseSensitive); isVBE {
-				// @todo this is quick and dirty, do regexp?
-				if VarnishVersion.Major == 4 && VarnishVersion.Minor >= 1 {
-					// <uuid>.<name>
-					if len(vIdentifier) > 37 && vIdentifier[8] == '-' && vIdentifier[36] == '.' {
-						labelKeys, labelValues = append(labelKeys, "server"), append(labelValues, vIdentifier[0:36])
-						labelKeys, labelValues = append(labelKeys, "backend"), append(labelValues, vIdentifier[37:])
-					}
-				} else {
-					// <name>(<ip>,<something>,<port>)
-					iStart, iEnd := strings.Index(vIdentifier, "("), strings.Index(vIdentifier, ")")
-					if iStart > 0 && iEnd > 1 && iStart < iEnd {
-						labelKeys, labelValues = append(labelKeys, "server"), append(labelValues, vIdentifier[iStart+1:iEnd])
-						labelKeys, labelValues = append(labelKeys, "backend"), append(labelValues, vIdentifier[0:iStart])
-					}
+				if hits := regexBackendUUID.FindAllStringSubmatch(vIdentifier, -1); len(hits) > 0 && len(hits[0]) >= 3 {
+					labelKeys, labelValues = append(labelKeys, "backend"), append(labelValues, cleanBackendName(hits[0][2]))
+					labelKeys, labelValues = append(labelKeys, "server"), append(labelValues, hits[0][1])
+				} else if hits := regexBackendParen.FindAllStringSubmatch(vIdentifier, -1); len(hits) > 0 && len(hits[0]) >= 3 {
+					labelKeys, labelValues = append(labelKeys, "backend"), append(labelValues, cleanBackendName(hits[0][1]))
+					labelKeys, labelValues = append(labelKeys, "server"), append(labelValues, strings.Replace(hits[0][2], ",,", ":", 1))
+				}
+				// We must be consistent with the number of labels and their names inside this scrape and between scrapes, or we will get this error:
+				// https://github.com/prometheus/client_golang/blob/3fb8ace93bc4ccddea55af62320c2fd109252880/prometheus/registry.go#L704-L707
+				if len(labelKeys) == 0 {
+					labelKeys, labelValues = append(labelKeys, "backend"), append(labelValues, cleanBackendName(vIdentifier))
+					labelKeys, labelValues = append(labelKeys, "server"), append(labelValues, "unknown")
 				}
 			}
 			if len(labelKeys) == 0 {

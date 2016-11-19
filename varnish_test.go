@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"runtime"
 	"testing"
 
@@ -39,6 +40,55 @@ func Test_VarnishVersion(t *testing.T) {
 			continue
 		}
 		t.Logf("%q > %s\n", versionStr, v.String())
+	}
+}
+
+func dummyBackendValue(backend string) (string, map[string]interface{}) {
+	return fmt.Sprintf("VBE.%s.happy", backend), map[string]interface{}{
+		"description": "Happy health probes",
+		"type":        "VBE",
+		"ident":       backend,
+		"flag":        "b",
+		"format":      "b",
+		"value":       0,
+	}
+}
+
+func Test_VarnishBackendNames(t *testing.T) {
+	for _, backend := range []string{
+		"eu1_x.y-z:w(192.52.0.192,,8085)", // 4.0.3
+		"root:eu2_x.y-z:w",                // 4.1
+		"def0e7f7-a676-4eed-9d8b-78ef7ce21e93.us1_x.y-z:w",
+		"root:29813cbb-7329-4eb8-8969-26be2ef58c88.us2_x.y-z:w", // ??
+		"boot.default",
+		"ce19737f-72b5-4f4b-9d39-3d8c2d28240b.default",
+	} {
+		vName, data := dummyBackendValue(backend)
+		var (
+			vGroup       = prometheusGroup(vName)
+			vDescription string
+			vIdentifier  string
+			vErr         error
+		)
+		if value, ok := data["description"]; ok && vErr == nil {
+			if vDescription, ok = value.(string); !ok {
+				vErr = fmt.Errorf("%s description it not a string", vName)
+			}
+		}
+		if value, ok := data["ident"]; ok && vErr == nil {
+			if vIdentifier, ok = value.(string); !ok {
+				vErr = fmt.Errorf("%s ident it not a string", vName)
+			}
+		}
+		if vErr != nil {
+			t.Error(vErr)
+			return
+		}
+		name, _, labelKeys, labelValues := computePrometheusInfo(vName, vGroup, vIdentifier, vDescription)
+		t.Logf("%s > %s\n", backend, name)
+		t.Logf("  ident   : %s\n", vIdentifier)
+		t.Logf("  backend : %s\n", findLabelValue("backend", labelKeys, labelValues))
+		t.Logf("  server  : %s\n", findLabelValue("server", labelKeys, labelValues))
 	}
 }
 

@@ -3,7 +3,7 @@ machine:
     DOCKER_IMAGE_NAME: lswith/varnish-exporter
     QUAY_IMAGE_NAME: quay.io/lswith/varnish-exporter
     DOCKER_TEST_IMAGE_NAME: quay.io/prometheus/golang-builder:1.6-base
-    REPO_PATH: github.com/lswith/prometheus_varnish_exporter
+    REPO_PATH: github.com/lswith/varnish_exporter
   pre:
     - sudo curl -L -o /usr/bin/docker 'https://s3-external-1.amazonaws.com/circle-downloads/docker-1.9.1-circleci'
     - sudo chmod 0755 /usr/bin/docker

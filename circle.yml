@@ -37,7 +37,7 @@ test:
 deployment:
   hub_branch:
     branch: master
-    owner: lswith
+    owner: Lswith
     commands:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
       - docker login -e $QUAY_EMAIL -u $QUAY_LOGIN -p $QUAY_PASSWORD quay.io

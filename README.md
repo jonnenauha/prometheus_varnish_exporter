@@ -1,5 +1,5 @@
 # Varnish exporter for Prometheus
-[![CircleCI](https://circleci.com/gh/Lswith/varnish_exporter/tree/master.svg?style=shield)][circleci]
+[![CircleCI](https://circleci.com/gh/Lswith/varnish_exporter/tree/master.svg?style=shield)]
 
 ![Grafana example](.github/grafana.png)
 
@@ -13,37 +13,24 @@ Tested to work against Varnish 4.1.0, 4.0.3 and 3.0.5. Missing category grouping
 
 I won't make any backwards compatibility promises at this point. Your built queries can break on new versions if metric names or labels are refined. If you find bugs or have feature requests feel free to create issues or send PRs.
 
-# Installing and running
+## Building and running
 
-You can find the latest binary releases for linux, darwin, windows, freebsd, openbsd and netbsd  from the [github releases page](https://github.com/jonnenauha/prometheus_varnish_exporter/releases).
+	make
+	./varnish_exporter <flags>
 
-See `prometheus_varnish_exporter -h` for available options.
+## Running tests
 
-To test that `varnishstat` is found on the host machine and to preview all exported metrics run
+	make test
 
-    prometheus_varnish_exporter -test
 
-# Grafana examples
+## Using Docker
 
-Here are some of the queries that I used to create Grafana dashboards with Prometheus data exported by this exporter. I am fairly new to Prometheus so these examples might be not be optimal, but will get you started. If you are monitoring multiple Varnish instances, you need make the queries more detailed with Prometheus label selectors.
+You can deploy this exporter using the [lswith/varnish-exporter](https://hub.docker.com/r/lswith/varnish-exporter/) Docker image.
 
-I'd be interested in Grafana dahsboard .json exports or Prometheus queries you make with this exporter. Perhaps we could make a wiki page of examples and premade generic dashboards.
+For example:
 
-    // Frontend requests
-    irate(varnish_main_client_req[5m])
-    
-    // Frontend requests
-    irate(varnish_main_backend_req[5m])
-    
-    // Network bytes frontend
-    irate(varnish_main_s_resp_hdrbytes[5m]) + irate(varnish_main_s_resp_bodybytes[5m])
-    
-    // Network bytes per backend
-    sum by (backend) keep_common (irate(varnish_backend_beresp_hdrbytes[5m]) + irate(varnish_backend_beresp_bodybytes[5m]))
-    
-    // Free memory (malloc allocator)
-    varnish_sma_g_space{type="s0"}
+```bash
+docker pull lswith/varnish-exporter
 
-# Build
-
-Use `go build` or `./build.sh` for cross compilation.
+docker run -d -p 9131:9131 -v /var/lib/varnish:/var/lib/varnish lswith/varnish-exporter -N /var/lib/varnish/_.vsm
+```

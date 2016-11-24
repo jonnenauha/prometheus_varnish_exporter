@@ -1,7 +1,7 @@
 go:
     cgo: true
 repository:
-    path: github.com/lswith/prometheus_varnish_exporter
+    path: github.com/lswith/varnish_exporter
 build:
     flags: -a -tags 'netgo static_build'
     ldflags: |

@@ -17,7 +17,7 @@ dependencies:
     - docker info
   override:
     - promu crossbuild
-    - ln -s .build/linux-amd64/node_exporter node_exporter
+    - ln -s .build/linux-amd64/varnish_exporter varnish_exporter
     - |
       if [ -n "$CIRCLE_TAG" ]; then
         make docker DOCKER_IMAGE_NAME=$DOCKER_IMAGE_NAME DOCKER_IMAGE_TAG=$CIRCLE_TAG

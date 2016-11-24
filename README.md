@@ -1,4 +1,5 @@
 # Varnish exporter for Prometheus
+[![CircleCI](https://circleci.com/gh/Lswith/varnish_exporter/tree/master.svg?style=shield)][circleci]
 
 ![Grafana example](.github/grafana.png)
 

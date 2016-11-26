@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jonnenauha/prometheus_varnish_exporter.svg?branch=master)](https://travis-ci.org/jonnenauha/prometheus_varnish_exporter)
+
 # Varnish exporter for Prometheus
 
 ![Grafana example](.github/grafana.png)

@@ -48,3 +48,9 @@ I'd be interested in Grafana dahsboard .json exports or Prometheus queries you m
 # Build
 
 Use `go build` or `./build.sh` for cross compilation.
+
+# Docker notes
+
+Building a docker image would not be useful for this application. It operates by executing the `varnishstat` tool. This executable is of course not available inside the exporters container. We could install and run Varnish inside the same container, but this would make little sense and be harder to manage.
+
+I do not know of a way to get the varnish stats over the network (--net="host" could be used to talk to it). If you have more info on this, please open an issue.

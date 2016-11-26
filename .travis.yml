@@ -8,12 +8,9 @@ language: go
 go:
   - 1.7.3
 
-env:
-  global:
-    - DOCKER_REPO=jonnenauha/prometheus_varnish_exporter
-
 before_script:
   - sudo apt-get install varnish -y
+  - varnishstat -V
 
 script:
   - go build

@@ -13,7 +13,7 @@ echo -e "\nVERSION=$VERSION"
 echo "VERSION_HASH=$VERSION_HASH"
 echo "VERSION_DATE=$VERSION_DATE"
 
-if [ -z $VERSION ]; then
+if [ -z "$VERSION" ]; then
     echo "Error: First argument must be release version"
     exit 1
 fi

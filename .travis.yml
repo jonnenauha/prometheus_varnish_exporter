@@ -20,7 +20,7 @@ script:
   - sudo $GOROOT/bin/go test -v ./...
 
 after_success:
-  - if [ -n $TRAVIS_TAG ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./build.sh $TRAVIS_TAG; fi
+  - if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./build.sh $TRAVIS_TAG; fi
 
 deploy:
   provider: releases

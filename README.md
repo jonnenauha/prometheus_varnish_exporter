@@ -47,7 +47,7 @@ I'd be interested in Grafana dahsboard .json exports or Prometheus queries you m
 
 # Build
 
-Use `go build` or `./build.sh` for cross compilation.
+Use `go build` or `./build.sh <version>` for cross compilation.
 
 # Docker notes
 

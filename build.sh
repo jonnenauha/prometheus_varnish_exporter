@@ -5,9 +5,18 @@ set -e
 rm -rf bin
 mkdir -p bin/release
 
-VERSION="1.2"
+VERSION=$1
 VERSION_HASH="$(git rev-parse --short HEAD)"
 VERSION_DATE="$(date -u '+%d.%m.%Y %H:%M:%S')"
+
+echo -e "\nVERSION=$VERSION"
+echo "VERSION_HASH=$VERSION_HASH"
+echo "VERSION_DATE=$VERSION_DATE"
+
+if [ -z $VERSION ]; then
+    echo "Error: First argument must be release version"
+    exit 1
+fi
 
 for goos in linux darwin windows freebsd openbsd netbsd ; do
     for goarch in amd64 386; do
@@ -17,6 +26,9 @@ for goos in linux darwin windows freebsd openbsd netbsd ; do
         if [ $goos = windows ] ; then
             path=$path.exe
         fi
+
+        mkdir -p $outdir
+        cp LICENSE CHANGELOG.md README.md $outdir/
 
         # build
         echo -e "\nBuilding $goos/$goarch"

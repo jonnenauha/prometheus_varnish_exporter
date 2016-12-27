@@ -32,18 +32,35 @@ I'd be interested in Grafana dahsboard .json exports or Prometheus queries you m
 
     // Frontend requests
     irate(varnish_main_client_req[5m])
-    
+
     // Frontend requests
     irate(varnish_main_backend_req[5m])
-    
+
     // Network bytes frontend
     irate(varnish_main_s_resp_hdrbytes[5m]) + irate(varnish_main_s_resp_bodybytes[5m])
-    
+
     // Network bytes per backend
     sum by (backend) keep_common (irate(varnish_backend_beresp_hdrbytes[5m]) + irate(varnish_backend_beresp_bodybytes[5m]))
-    
+
     // Free memory (malloc allocator)
     varnish_sma_g_space{type="s0"}
+
+# Varnish 4 and VCL UUIDs
+
+Starting with version 1.2 `backend` and `server` labels are always set. For backend-related metrics and Varnish 4 the `server` tag will be set to the VCL UUIDs for that backend. Note that there might be multiple VCLs loaded at the same time and the `server` tag might not be meaningful in that case.
+
+To aggregate all loaded VCLs into per-backend metric the following Prometheus [recording rules](https://prometheus.io/docs/querying/rules/) are recommended:
+
+    backend:varnish_backend_bereq_bodybytes:sum = sum(varnish_backend_bereq_bodybytes) without (server)
+    backend:varnish_backend_bereq_hdrbytes:sum = sum(varnish_backend_bereq_hdrbytes) without (server)
+    backend:varnish_backend_beresp_bodybytes:sum = sum(varnish_backend_beresp_bodybytes) without (server)
+    backend:varnish_backend_beresp_hdrbytes:sum = sum(varnish_backend_beresp_hdrbytes) without (server)
+    backend:varnish_backend_conn:sum = sum(varnish_backend_conn) without (server)
+    backend:varnish_backend_happy:sum = sum(varnish_backend_happy) without (server)
+    backend:varnish_backend_pipe_hdrbytes:sum = sum(varnish_backend_pipe) without (server)
+    backend:varnish_backend_pipe_in:sum = sum(varnish_backend_pipe_in) without (server)
+    backend:varnish_backend_pipe_out:sum = sum(varnish_backend_pipe_out) without (server)
+    backend:varnish_backend_req:sum = sum(varnish_backend_req) without (server)
 
 # Build
 

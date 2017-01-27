@@ -1,5 +1,4 @@
-
-bin
-
-prometheus_varnish_exporter
-prometheus_varnish_exporter.exe
+/.build/
+/.release/
+/.tarballs/
+/prometheus_varnish_exporter

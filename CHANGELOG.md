@@ -1,3 +1,7 @@
+1.3.0
+=====
+* The exporter is built and packaged differently in an attempt to be consistent with official Prometheus exporters.
+
 1.2
 =====
 * Fix VBE label inconsistencies by always having `backend` and `server` labels present. ([#5](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/5) [#8](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/8))

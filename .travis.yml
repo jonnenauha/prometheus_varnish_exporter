@@ -1,7 +1,9 @@
 sudo: required
 
-language: go
+services:
+  - docker
 
+language: go
 go:
   - 1.7.3
 
@@ -10,30 +12,4 @@ before_script:
   - varnishstat -V
 
 script:
-  - go build
-  - sudo $GOROOT/bin/go test -v ./...
-
-after_success:
-  - if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./build.sh $TRAVIS_TAG; fi
-
-deploy:
-  provider: releases
-  api_key:
-    secure: eDySTfAst2/hz39o1Lt2OnbNtep/eyeFPIT9WdpK8ajVuXAdP2MAwwotmH30iGjCijLW0k7vzZI7yczHqUSEB0E9qHXhF2LDLeirlSMHVWPl4sRDq1+gn0nHBkgH5jO5vAE3pj+zd/N+4rKutCtOBhsfdZKxDuxJXR8On0wwnCVFVQoIsC7gqM2TGmtFpfSFwVefNHdYyWgh0YMg9JtzUp2mSQr8e0+L4fO5jafhpbFXlTzhxqoPwyI2UhnXRLTjCQWWCjxN+37ij13Y6H9NxEaHJr+t9ejpNbKFfUZmhF/9n2seesoeYC9HEkEWTTjuERc1CQlgtxG+sMk1b0ejZio0QUQbVB1U+aTtac2m3U5k4oEAUhYs4rHKy+QmVSRp3Qmo+PV7CuSv9CKivxhvbMUPpos1eF6CuHR3ZKjn/11VimnhpXJcyl44oM4UfoLsZuOcieWta9fLBd0EO+SIvmaBLljAKRMjrnCpkT9E0dKWgUqyDQzqv5l2WZ7lFT+bWuDJ7WeIwnG59jVOjSwvniFWQwQyJ0BmjjGB4g3ZYSQb8oBj+6RzxoBPpoEewBsypXZoDB0yL7GEqxnHmoVLe7D6R/lG+TeTVMOZLkAw13UNAw1v1VHwe0kjM5zqEMekZaLbmvHVC5hUEUob4xsiQu/qHGelT9+Gq9ICwB8GbWg=
-  file:
-    - "bin/release/linux-amd64.tar.gz"
-    - "bin/release/linux-386.tar.gz"
-    - "bin/release/freebsd-amd64.tar.gz"
-    - "bin/release/freebsd-386.tar.gz"
-    - "bin/release/openbsd-amd64.tar.gz"
-    - "bin/release/openbsd-386.tar.gz"
-    - "bin/release/netbsd-amd64.tar.gz"
-    - "bin/release/netbsd-386.tar.gz"
-    - "bin/release/darwin-amd64.tar.gz"
-    - "bin/release/darwin-386.tar.gz"
-    - "bin/release/windows-amd64.zip"
-    - "bin/release/windows-386.zip"
-  skip_cleanup: true
-  on:
-    repo: jonnenauha/prometheus_varnish_exporter
-    tags: true
+  - make

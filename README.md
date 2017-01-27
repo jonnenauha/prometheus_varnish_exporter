@@ -64,7 +64,7 @@ To aggregate all loaded VCLs into per-backend metric the following Prometheus [r
 
 # Build
 
-Use `go build` or `./build.sh <version>` for cross compilation.
+Just run `make`.
 
 # Docker notes
 

@@ -2,8 +2,13 @@
 
 set -e
 
+if [ ! -e main.go ] ; then
+    echo "Error: Script can only be ran on the root of the source tree"
+    exit 1
+fi
+
 rm -rf bin
-mkdir -p bin/release
+mkdir -p bin/build bin/release
 
 VERSION=$1
 VERSION_HASH="$(git rev-parse --short HEAD)"
@@ -21,7 +26,8 @@ fi
 for goos in linux darwin windows freebsd openbsd netbsd ; do
     for goarch in amd64 386; do
         # path
-        outdir="bin/$goos/$goarch"
+        file_versioned="prometheus_varnish_exporter-$VERSION.$goos-$goarch"
+        outdir="bin/build/$file_versioned"
         path="$outdir/prometheus_varnish_exporter"
         if [ $goos = windows ] ; then
             path=$path.exe
@@ -36,11 +42,7 @@ for goos in linux darwin windows freebsd openbsd netbsd ; do
         echo "  > `du -hc $path | awk 'NR==1{print $1;}'`    `file $path`"
 
         # compress (for unique filenames to github release files)
-        if [ $goos = windows ] ; then
-            zip -rjX ./bin/release/$goos-$goarch.zip ./$outdir/ > /dev/null 2>&1
-        else
-            tar -C ./$outdir/ -cvzf ./bin/release/$goos-$goarch.tar.gz . > /dev/null 2>&1
-        fi
+        tar -C ./bin/build -cvzf ./bin/release/$file_versioned.tar.gz $file_versioned > /dev/null 2>&1
     done
 done
 
@@ -48,13 +50,11 @@ go env > .goenv
 source .goenv
 rm .goenv
 
-echo -e "\nRelease done: $(./bin/$GOOS/$GOARCH/prometheus_varnish_exporter --version)"
+echo -e "\nRelease done: $(./bin/build/prometheus_varnish_exporter-$VERSION.$GOOS-$GOARCH/prometheus_varnish_exporter --version)"
 for goos in linux darwin windows freebsd openbsd netbsd ; do
     for goarch in amd64 386; do
-        path=bin/release/$goos-$goarch.tar.gz
-        if [ $goos = windows ] ; then
-            path=bin/release/$goos-$goarch.zip
-        fi
+        file_versioned="prometheus_varnish_exporter-$VERSION.$goos-$goarch"
+        path=bin/release/$file_versioned.tar.gz
         echo "  > `du -hc $path | awk 'NR==1{print $1;}'`    $path"
     done
 done

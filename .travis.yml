@@ -31,8 +31,8 @@ deploy:
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.netbsd-386.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.darwin-amd64.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.darwin-386.tar.gz"
-    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.windows-amd64.zip"
-    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.windows-386.zip"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.windows-amd64.tar.gz"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.windows-386.tar.gz"
   skip_cleanup: true
   on:
     repo: jonnenauha/prometheus_varnish_exporter

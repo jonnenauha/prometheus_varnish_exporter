@@ -1,7 +1,13 @@
+1.3.1
+=====
+
+* Don't return a 400 for `/` to behave more like other Prometheus exporters out there. Can now be used for health checks. ([#15](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/15))
+* Start building releases with go 1.8
+
 1.3
 ===
 * Release packages now use the same naming and internal structure scheme with [promu](https://github.com/prometheus/promu).
- * Fixes issues running this exporter with systems like [puppet-prometheus](https://github.com/voxpupuli/puppet-prometheus)
+  * Fixes issues running this exporter with systems like [puppet-prometheus](https://github.com/voxpupuli/puppet-prometheus)
 * No code changes
 * Start building releases with go 1.7.5
 

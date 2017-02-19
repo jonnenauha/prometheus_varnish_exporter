@@ -141,12 +141,15 @@ func main() {
 
 	prometheus.MustRegister(PrometheusExporter)
 
-	// 400 Bad Request for anything except the configured metrics path, or health if configured.
-	// If you want to make the path obscure to hide it from snooping while still exposing
-	// it to the public web, you don't want to show some "go here instead" message at root etc.
 	if StartParams.Path != "/" {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`<html>
+    <head><title>Varnish Exporter</title></head>
+    <body>
+        <h1>Varnish Exporter</h1>
+    	<p><a href="` + StartParams.Path + `">Metrics</a></p>
+    </body>
+</html>`))
 		})
 	}
 	if StartParams.HealthPath != "" {

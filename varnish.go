@@ -38,7 +38,7 @@ func scrapeVarnish(ch chan<- prometheus.Metric) (*bytes.Buffer, error) {
 	if errExec != nil {
 		return buf, errExec
 	}
-	// The output JSON annoyingly is not stuctured so that we could make a nice map[string]struct for it.
+	// The output JSON annoyingly is not structured so that we could make a nice map[string]struct for it.
 	metricsJSON := make(map[string]interface{})
 	dec := json.NewDecoder(buf)
 	if err := dec.Decode(&metricsJSON); err != nil {

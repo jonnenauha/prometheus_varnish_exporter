@@ -1,3 +1,8 @@
+1.3.2
+=====
+* Update readme to mention that exporter has been tested to work against Varnish 5.x releases.
+* Start building releases with go 1.9
+
 1.3.1
 =====
 

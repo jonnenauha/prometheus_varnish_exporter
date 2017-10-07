@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -164,4 +165,34 @@ func Test_VarnishMetrics(t *testing.T) {
 		}
 		t.Logf("  %d metrics", len(descs))
 	}
+}
+
+// Testing against a live varnish instance is only executed in build bot(s).
+// This is because the usual end user setup requires tests to be ran with sudo in order to work.
+func Test_VarnishMetrics_CI(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skipf("Host needs to be linux to run live metrics test: %s", runtime.GOOS)
+		return
+	} else if os.Getenv("CONTINUOUS_INTEGRATION") != "true" {
+		t.Skip("Live metrics test only ran on CI")
+		return
+	}
+
+	StartParams.Verbose = true
+	StartParams.Raw = true
+
+	if err := VarnishVersion.Initialize(); err != nil {
+		t.Fatal(err)
+	}
+
+	metrics := make(chan prometheus.Metric)
+	go func() {
+		for m := range metrics {
+			t.Logf("%s", m.Desc())
+		}
+	}()
+	if _, err := ScrapeVarnish(metrics); err != nil {
+		t.Fatal(err)
+	}
+	close(metrics)
 }

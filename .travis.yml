@@ -3,7 +3,7 @@ sudo: required
 language: go
 
 go:
-  - 1.9
+  - 1.9.1
 
 before_script:
   - sudo apt-get install varnish -y

@@ -3,6 +3,7 @@
 * New `-no-exit` mode that does not exit the process if varnish is not running at the time of startup.
 * Support Varnish 5.2 [that removed](http://varnish-cache.org/docs/5.2/whats-new/upgrading-5.2.html#other-changes) `type` and `ident` properties from varnishstat JSON output. If `ident` is not present, it is now parsed from the metric name.
 * Add tests to run scrape on static json files.
+* Start building releases with go 1.9.1
 
 1.3.2
 =====

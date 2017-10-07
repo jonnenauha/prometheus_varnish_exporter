@@ -29,14 +29,14 @@ func scrapeVarnish(ch chan<- prometheus.Metric) (*bytes.Buffer, error) {
 	if VarnishVersion.Major >= 4 && VarnishVersion.Minor >= 1 {
 		// timeout to not hang for a long time if instance is not found.
 		// Varnish 3.x exits immediately on faulty params
-		params = append(params, "-t", "2")
+		params = append(params, "-t", "1")
 	}
 	if !StartParams.Params.isEmpty() {
 		params = append(params, StartParams.Params.make()...)
 	}
 	buf, errExec := executeVarnishstat(params...)
 	if errExec != nil {
-		return buf, errExec
+		return buf, fmt.Errorf("%s scrape failed: %s", varnishstatExe, errExec)
 	}
 	// The output JSON annoyingly is not structured so that we could make a nice map[string]struct for it.
 	metricsJSON := make(map[string]interface{})
@@ -143,6 +143,10 @@ func NewVarnishVersion() *varnishVersion {
 	}
 }
 
+func (v *varnishVersion) Valid() bool {
+	return v.Major != -1
+}
+
 func (v *varnishVersion) Initialize() error {
 	return v.queryVersion()
 }
@@ -152,11 +156,10 @@ func (v *varnishVersion) queryVersion() error {
 	if err != nil {
 		return err
 	}
-	scanner := bufio.NewScanner(buf)
-	for scanner.Scan() {
+	if scanner := bufio.NewScanner(buf); scanner.Scan() {
 		return v.parseVersion(scanner.Text())
 	}
-	return nil
+	return fmt.Errorf("Failed to get varnishstat -V output")
 }
 
 func (v *varnishVersion) parseVersion(version string) error {
@@ -167,7 +170,7 @@ func (v *varnishVersion) parseVersion(version string) error {
 			return err
 		}
 	}
-	if !v.isValid() {
+	if !v.Valid() {
 		return fmt.Errorf("Failed to resolve version from %q", version)
 	}
 	return nil
@@ -214,10 +217,6 @@ func (v *varnishVersion) set(parts []string) error {
 		}
 	}
 	return nil
-}
-
-func (v *varnishVersion) isValid() bool {
-	return v.Major != -1
 }
 
 // Version string with numbers only, no revision.

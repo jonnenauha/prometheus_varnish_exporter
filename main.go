@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -20,6 +21,7 @@ var (
 
 	PrometheusExporter = NewPrometheusExporter()
 	VarnishVersion     = NewVarnishVersion()
+	ExitHandler        = &exitHandler{}
 
 	StartParams = &startParams{
 		ListenAddress: ":9131", // Reserved and publicly announced at https://github.com/prometheus/prometheus/wiki/Default-port-allocations
@@ -34,9 +36,11 @@ type startParams struct {
 	Path          string
 	HealthPath    string
 	Params        *varnishstatParams
-	Verbose       bool
-	Test          bool
-	Raw           bool
+
+	Verbose bool
+	NoExit  bool
+	Test    bool
+	Raw     bool
 }
 
 type varnishstatParams struct {
@@ -54,7 +58,7 @@ func (p *varnishstatParams) make() (params []string) {
 		params = append(params, "-n", p.Instance)
 	}
 	// -N is not supported by 3.x
-	if p.VSM != "" && VarnishVersion != nil && VarnishVersion.Major >= 4 {
+	if p.VSM != "" && VarnishVersion.Major >= 4 {
 		params = append(params, "-N", p.VSM)
 	}
 	return params
@@ -73,6 +77,7 @@ func init() {
 	// modes
 	version := false
 	flag.BoolVar(&version, "version", version, "Print version and exit")
+	flag.BoolVar(&StartParams.NoExit, "no-exit", StartParams.NoExit, "Do not exit server on Varnish scrape errors.")
 	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging.")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
@@ -95,6 +100,11 @@ func init() {
 	if StartParams.Path == StartParams.HealthPath {
 		logFatal("-web.telemetry-path and -web.health-path cannot have same value")
 	}
+
+	// This looks weird, but we want the start param to have default value
+	// of the old behavior, not flip it with e.g. -exit. You have to
+	// explicitly turn on the changed behavior.
+	ExitHandler.exitOnError = StartParams.Test == true || StartParams.NoExit == false
 }
 
 func main() {
@@ -106,11 +116,13 @@ func main() {
 
 	// Initialize
 	if err := VarnishVersion.Initialize(); err != nil {
-		logFatal("Varnish version initialize failed: %s", err.Error())
+		ExitHandler.Errorf("Varnish version initialize failed: %s", err.Error())
 	}
-	logInfo("Found varnishstat %s", VarnishVersion)
-	if err := PrometheusExporter.Initialize(); err != nil {
-		logFatal("Prometheus exporter initialize failed: %s", err.Error())
+	if VarnishVersion.Valid() {
+		logInfo("Found varnishstat %s", VarnishVersion)
+		if err := PrometheusExporter.Initialize(); err != nil {
+			ExitHandler.Errorf("Prometheus exporter initialize failed: %s", err.Error())
+		}
 	}
 
 	// Test to verify everything is ok before starting the server
@@ -124,13 +136,17 @@ func main() {
 			}
 		}()
 		tStart := time.Now()
-		if buf, err := scrapeVarnish(metrics); err != nil {
-			logRaw("\n%s\n", buf.Bytes())
-			logFatal("Test scrape failed: %s", err.Error())
-		}
+		buf, err := scrapeVarnish(metrics)
 		close(metrics)
-		logInfo("Test scrape done in %s", time.Now().Sub(tStart))
-		logRaw("")
+		if err == nil {
+			logInfo("Test scrape done in %s", time.Now().Sub(tStart))
+			logRaw("")
+		} else {
+			if buf.Len() > 0 {
+				logRaw("\n%s", buf.Bytes())
+			}
+			ExitHandler.Errorf("Startup test: %s", err.Error())
+		}
 	}
 	if StartParams.Test {
 		return
@@ -163,6 +179,43 @@ func main() {
 	// metrics
 	http.Handle(StartParams.Path, prometheus.Handler())
 	logFatalError(http.ListenAndServe(StartParams.ListenAddress, nil))
+}
+
+type exitHandler struct {
+	sync.RWMutex
+	exitOnError bool
+	err         error
+}
+
+func (ex *exitHandler) Errorf(format string, a ...interface{}) error {
+	return ex.Set(fmt.Errorf(format, a...))
+}
+
+func (ex *exitHandler) HasError() bool {
+	ex.RLock()
+	hasError := ex.err != nil
+	ex.RUnlock()
+	return hasError
+}
+
+func (ex *exitHandler) Set(err error) error {
+	ex.Lock()
+	defer ex.Unlock()
+
+	if err == nil {
+		ex.err = nil
+		return nil
+	}
+
+	errDiffers := ex.err == nil || ex.err.Error() != err.Error()
+	ex.err = err
+
+	if ex.exitOnError {
+		logFatal("%s", err.Error())
+	} else if errDiffers {
+		logError("%s", err.Error())
+	}
+	return err
 }
 
 func getVersion(date bool) (version string) {

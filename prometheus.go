@@ -24,8 +24,6 @@ type prometheusExporter struct {
 
 func NewPrometheusExporter() *prometheusExporter {
 	return &prometheusExporter{
-		// @todo varnishstat never fails, even if varnish is not running.
-		// Figure our a reliable way to detect if varnish is running and use that for up.
 		up: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: exporterNamespace,
 			Name:      "up",
@@ -50,7 +48,9 @@ func (pe *prometheusExporter) Describe(ch chan<- *prometheus.Desc) {
 	start := time.Now()
 
 	ch <- pe.up.Desc()
-	ch <- pe.version.Desc()
+	if pe.version != nil {
+		ch <- pe.version.Desc()
+	}
 
 	if StartParams.Verbose {
 		logInfo("prometheus.Collector.Describe  %s", time.Now().Sub(start))
@@ -64,18 +64,31 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	pe.Lock()
 	defer pe.Unlock()
 
-	if _, err := scrapeVarnish(ch); err == nil {
+	hadError := ExitHandler.HasError()
+
+	_, err := scrapeVarnish(ch)
+	ExitHandler.Set(err)
+
+	if err == nil {
+		if hadError {
+			logInfo("Successful scrape")
+		}
 		pe.up.Set(1)
 	} else {
-		logError(err.Error())
 		pe.up.Set(0)
 	}
 
 	ch <- pe.up
-	ch <- pe.version
+	if pe.version != nil {
+		ch <- pe.version
+	}
 
 	if StartParams.Verbose {
-		logInfo("prometheus.Collector.Collect   %s", time.Now().Sub(start))
+		postfix := ""
+		if err != nil {
+			postfix = " (scrape failed)"
+		}
+		logInfo("prometheus.Collector.Collect   %s%s", time.Now().Sub(start), postfix)
 	}
 }
 

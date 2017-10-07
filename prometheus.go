@@ -64,9 +64,22 @@ func (pe *prometheusExporter) Collect(ch chan<- prometheus.Metric) {
 	pe.Lock()
 	defer pe.Unlock()
 
+	// Rare case of varnish not being installed in the system
+	// when we started, but installed while we are running.
+	if !VarnishVersion.Valid() {
+		if VarnishVersion.Initialize() == nil {
+			pe.version = prometheus.NewGauge(prometheus.GaugeOpts{
+				Namespace:   exporterNamespace,
+				Name:        "version",
+				Help:        "Varnish version information",
+				ConstLabels: VarnishVersion.Labels(),
+			})
+		}
+	}
+
 	hadError := ExitHandler.HasError()
 
-	_, err := scrapeVarnish(ch)
+	_, err := ScrapeVarnish(ch)
 	ExitHandler.Set(err)
 
 	if err == nil {
@@ -209,6 +222,14 @@ func cleanBackendName(name string) string {
 
 // https://prometheus.io/docs/practices/naming/
 func computePrometheusInfo(vName, vGroup, vIdentifier, vDescription string) (name, description string, labelKeys, labelValues []string) {
+	{
+		// Varnish >= 5.2 no longer has 'ident', parse from full vName
+		// as "<group>.<ident>.<name>"
+		if len(vIdentifier) == 0 && strings.Count(vName, ".") > 1 {
+			vIdentifier = prometheusTrimGroupPrefix(strings.ToLower(vName))
+			vIdentifier = vIdentifier[0:strings.LastIndex(vIdentifier, ".")]
+		}
+	}
 	// name and description
 	{
 		fq := strings.ToLower(vName)

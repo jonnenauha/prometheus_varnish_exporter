@@ -10,7 +10,7 @@ Handles runtime Varnish changes like adding new backends via vlc reload. Removed
 
 Advanced users can use `-n -N`, they are passed to `varnishstat`.
 
-Tested to work against Varnish 5.1.2, 4.1.0, 4.0.3 and 3.0.5. Missing category groupings in 3.x like `MAIN.` are detected and added automatically for label names to be consistent across versions, assuming of course that the Varnish project does not remove/change the stats.
+I have personally tested the following versions of Varnish to work `5.2, 5.1.2, 4.1.1, 4.1.0, 4.0.3 and 3.0.5`. Missing category groupings in 3.x like `MAIN.` are detected and added automatically for label names to be consistent across versions, assuming of course that the Varnish project does not remove/change the stats.
 
 I won't make any backwards compatibility promises at this point. Your built queries can break on new versions if metric names or labels are refined. If you find bugs or have feature requests feel free to create issues or send PRs.
 

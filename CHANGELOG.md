@@ -1,3 +1,9 @@
+1.3.3
+=====
+* New `-no-exit` mode that does not exit the process if varnish is not running at the time of startup.
+* Support Varnish 5.2 [that removed](http://varnish-cache.org/docs/5.2/whats-new/upgrading-5.2.html#other-changes) `type` and `ident` properties from varnishstat JSON output. If `ident` is not present, it is now parsed from the metric name.
+* Add tests to run scrape on static json files.
+
 1.3.2
 =====
 * Update readme to mention that exporter has been tested to work against Varnish 5.x releases.

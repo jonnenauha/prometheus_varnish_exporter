@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
-	"runtime"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -10,6 +13,9 @@ import (
 
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{
+		"varnishstat (varnish-5.2.0 revision 4c4875cbf)": &varnishVersion{
+			Major: 5, Minor: 2, Patch: 0, Revision: "4c4875cbf",
+		},
 		"varnishstat (varnish-4.1.0 revision 3041728)": &varnishVersion{
 			Major: 4, Minor: 1, Patch: 0, Revision: "3041728",
 		},
@@ -40,6 +46,15 @@ func Test_VarnishVersion(t *testing.T) {
 			continue
 		}
 		t.Logf("%q > %s\n", versionStr, v.String())
+		if !test.EqualsOrGreater(test.Major, test.Minor) {
+			t.Fatalf("%s does not satisfy itself", test)
+		}
+		if !test.EqualsOrGreater(test.Major-1, 0) {
+			t.Fatalf("%s should satisfy version %d.0", test, test.Major-1)
+		}
+		if test.EqualsOrGreater(test.Major, test.Minor+1) {
+			t.Fatalf("%s should not satisfy version %d.%d", test, test.Major, test.Minor+1)
+		}
 	}
 }
 
@@ -52,6 +67,18 @@ func dummyBackendValue(backend string) (string, map[string]interface{}) {
 		"format":      "b",
 		"value":       0,
 	}
+}
+
+func matchStringSlices(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+	for i, v1 := range s1 {
+		if s2[i] != v1 {
+			return false
+		}
+	}
+	return true
 }
 
 func Test_VarnishBackendNames(t *testing.T) {
@@ -84,34 +111,57 @@ func Test_VarnishBackendNames(t *testing.T) {
 			t.Error(vErr)
 			return
 		}
-		name, _, labelKeys, labelValues := computePrometheusInfo(vName, vGroup, vIdentifier, vDescription)
-		t.Logf("%s > %s\n", backend, name)
+		// Varnish < 5.2
+		name_1, _, labelKeys_1, labelValues_1 := computePrometheusInfo(vName, vGroup, vIdentifier, vDescription)
+		t.Logf("%s > %s > %s\n", vName, backend, name_1)
 		t.Logf("  ident   : %s\n", vIdentifier)
-		t.Logf("  backend : %s\n", findLabelValue("backend", labelKeys, labelValues))
-		t.Logf("  server  : %s\n", findLabelValue("server", labelKeys, labelValues))
+		t.Logf("  backend : %s\n", findLabelValue("backend", labelKeys_1, labelValues_1))
+		t.Logf("  server  : %s\n", findLabelValue("server", labelKeys_1, labelValues_1))
+
+		// Varnish >= 5.2 no longer has 'ident', test that detected correctly from vName
+		name_2, _, labelKeys_2, labelValues_2 := computePrometheusInfo(vName, vGroup, "", vDescription)
+		if name_1 != name_2 {
+			t.Fatalf("name %q != %q", name_1, name_2)
+		}
+		if !matchStringSlices(labelKeys_1, labelKeys_2) {
+			t.Fatalf("labelKeys %#v != %#v", labelKeys_1, labelKeys_2)
+		}
+		if !matchStringSlices(labelValues_1, labelValues_2) {
+			t.Fatalf("labelKeys %#v != %#v", labelValues_1, labelValues_2)
+		}
 	}
 }
 
 func Test_VarnishMetrics(t *testing.T) {
-	// @todo This is kind of pointless. The idea was to test against
-	// JSON output of different versions of Varnish. Enable back at some point
-	// and figure out a way to scrape from buffer without code duplication.
-	if runtime.GOOS != "linux" {
-		t.Skipf("Host needs to be linux to run metrics test: %s", runtime.GOOS)
-		return
+	dir, _ := os.Getwd()
+	if !fileExists(filepath.Join(dir, "test/scrape")) {
+		t.Skipf("Cannot find test/scrape files from workind dir %s", dir)
 	}
+	for _, test := range []string{
+		filepath.Join(dir, "test/scrape", "4.1.1.json"),
+		filepath.Join(dir, "test/scrape", "5.2.0.json"),
+	} {
+		version := strings.Replace(filepath.Base(test), ".json", "", -1)
+		VarnishVersion.parseVersion(version)
+		t.Logf("test scrape %s", VarnishVersion)
 
-	StartParams.Verbose = true
-	StartParams.Raw = true
-
-	metrics := make(chan prometheus.Metric)
-	go func() {
-		for m := range metrics {
-			t.Logf("%s", m.Desc())
+		buf, err := ioutil.ReadFile(test)
+		if err != nil {
+			t.Fatal(err.Error())
 		}
-	}()
-	if _, err := scrapeVarnish(metrics); err != nil {
-		t.Skipf("Host machine needs varnishstat to be able to run tests: %s", err.Error())
+		metrics := make(chan prometheus.Metric)
+		descs := []*prometheus.Desc{}
+		go func() {
+			for m := range metrics {
+				descs = append(descs, m.Desc())
+			}
+		}()
+		_, err = ScrapeVarnishFrom(buf, metrics)
+		close(metrics)
+
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+		t.Logf("  %d metrics", len(descs))
 	}
-	close(metrics)
 }

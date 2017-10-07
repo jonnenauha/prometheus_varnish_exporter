@@ -58,7 +58,7 @@ func (p *varnishstatParams) make() (params []string) {
 		params = append(params, "-n", p.Instance)
 	}
 	// -N is not supported by 3.x
-	if p.VSM != "" && VarnishVersion.Major >= 4 {
+	if p.VSM != "" && VarnishVersion.EqualsOrGreater(4, 0) {
 		params = append(params, "-N", p.VSM)
 	}
 	return params
@@ -121,7 +121,7 @@ func main() {
 	if VarnishVersion.Valid() {
 		logInfo("Found varnishstat %s", VarnishVersion)
 		if err := PrometheusExporter.Initialize(); err != nil {
-			ExitHandler.Errorf("Prometheus exporter initialize failed: %s", err.Error())
+			logFatal("Prometheus exporter initialize failed: %s", err.Error())
 		}
 	}
 
@@ -136,14 +136,14 @@ func main() {
 			}
 		}()
 		tStart := time.Now()
-		buf, err := scrapeVarnish(metrics)
+		buf, err := ScrapeVarnish(metrics)
 		close(metrics)
 		if err == nil {
 			logInfo("Test scrape done in %s", time.Now().Sub(tStart))
 			logRaw("")
 		} else {
-			if buf.Len() > 0 {
-				logRaw("\n%s", buf.Bytes())
+			if len(buf) > 0 {
+				logRaw("\n%s", buf)
 			}
 			ExitHandler.Errorf("Startup test: %s", err.Error())
 		}

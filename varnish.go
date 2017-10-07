@@ -24,23 +24,27 @@ var (
 	mDescCache sync.RWMutex
 )
 
-func scrapeVarnish(ch chan<- prometheus.Metric) (*bytes.Buffer, error) {
+func ScrapeVarnish(ch chan<- prometheus.Metric) ([]byte, error) {
 	params := []string{"-j"}
-	if VarnishVersion.Major >= 4 && VarnishVersion.Minor >= 1 {
-		// timeout to not hang for a long time if instance is not found.
-		// Varnish 3.x exits immediately on faulty params
-		params = append(params, "-t", "1")
+	if VarnishVersion.EqualsOrGreater(4, 1) {
+		// 4.1 started to support timeout to exit immediately on connection errors.
+		// Before that varnishstat exits immediately on faulty params or connection errors.
+		params = append(params, "-t", "0")
 	}
 	if !StartParams.Params.isEmpty() {
 		params = append(params, StartParams.Params.make()...)
 	}
 	buf, errExec := executeVarnishstat(params...)
 	if errExec != nil {
-		return buf, fmt.Errorf("%s scrape failed: %s", varnishstatExe, errExec)
+		return buf.Bytes(), fmt.Errorf("%s scrape failed: %s", varnishstatExe, errExec)
 	}
+	return ScrapeVarnishFrom(buf.Bytes(), ch)
+}
+
+func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) {
 	// The output JSON annoyingly is not structured so that we could make a nice map[string]struct for it.
 	metricsJSON := make(map[string]interface{})
-	dec := json.NewDecoder(buf)
+	dec := json.NewDecoder(bytes.NewBuffer(buf))
 	if err := dec.Decode(&metricsJSON); err != nil {
 		return buf, err
 	}
@@ -115,17 +119,11 @@ func scrapeVarnish(ch chan<- prometheus.Metric) (*bytes.Buffer, error) {
 
 // Returns the result of 'varnishtat' with optional command line params.
 func executeVarnishstat(params ...string) (*bytes.Buffer, error) {
-	buf := bytes.Buffer{}
+	buf := &bytes.Buffer{}
 	cmd := exec.Command(varnishstatExe, params...)
-	cmd.Stdout = &buf
-	cmd.Stderr = &buf
-	if err := cmd.Start(); err != nil {
-		return &buf, err
-	}
-	if err := cmd.Wait(); err != nil {
-		return &buf, err
-	}
-	return &buf, nil
+	cmd.Stdout = buf
+	cmd.Stderr = buf
+	return buf, cmd.Run()
 }
 
 // varnishVersion
@@ -141,6 +139,15 @@ func NewVarnishVersion() *varnishVersion {
 	return &varnishVersion{
 		Major: -1, Minor: -1, Patch: -1,
 	}
+}
+
+func (v *varnishVersion) EqualsOrGreater(major, minor int) bool {
+	if v.Major > major {
+		return true
+	} else if v.Major == major && v.Minor >= minor {
+		return true
+	}
+	return false
 }
 
 func (v *varnishVersion) Valid() bool {

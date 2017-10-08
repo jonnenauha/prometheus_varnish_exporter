@@ -15,10 +15,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-const (
-	varnishstatExe = "varnishstat"
-)
-
 var (
 	descCache  = make(map[string]*prometheus.Desc)
 	mDescCache sync.RWMutex
@@ -34,9 +30,9 @@ func ScrapeVarnish(ch chan<- prometheus.Metric) ([]byte, error) {
 	if !StartParams.Params.isEmpty() {
 		params = append(params, StartParams.Params.make()...)
 	}
-	buf, errExec := executeVarnishstat(params...)
+	buf, errExec := executeVarnishstat(StartParams.VarnishstatExe, params...)
 	if errExec != nil {
-		return buf.Bytes(), fmt.Errorf("%s scrape failed: %s", varnishstatExe, errExec)
+		return buf.Bytes(), fmt.Errorf("%s scrape failed: %s", StartParams.VarnishstatExe, errExec)
 	}
 	return ScrapeVarnishFrom(buf.Bytes(), ch)
 }
@@ -118,7 +114,7 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 }
 
 // Returns the result of 'varnishtat' with optional command line params.
-func executeVarnishstat(params ...string) (*bytes.Buffer, error) {
+func executeVarnishstat(varnishstatExe string, params ...string) (*bytes.Buffer, error) {
 	buf := &bytes.Buffer{}
 	cmd := exec.Command(varnishstatExe, params...)
 	cmd.Stdout = buf
@@ -159,7 +155,7 @@ func (v *varnishVersion) Initialize() error {
 }
 
 func (v *varnishVersion) queryVersion() error {
-	buf, err := executeVarnishstat("-V")
+	buf, err := executeVarnishstat(StartParams.VarnishstatExe, "-V")
 	if err != nil {
 		return err
 	}

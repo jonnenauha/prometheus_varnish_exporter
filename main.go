@@ -24,18 +24,20 @@ var (
 	ExitHandler        = &exitHandler{}
 
 	StartParams = &startParams{
-		ListenAddress: ":9131", // Reserved and publicly announced at https://github.com/prometheus/prometheus/wiki/Default-port-allocations
-		Path:          "/metrics",
-		Params:        &varnishstatParams{},
+		ListenAddress:  ":9131", // Reserved and publicly announced at https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+		Path:           "/metrics",
+		VarnishstatExe: "varnishstat",
+		Params:         &varnishstatParams{},
 	}
 	logger *log.Logger
 )
 
 type startParams struct {
-	ListenAddress string
-	Path          string
-	HealthPath    string
-	Params        *varnishstatParams
+	ListenAddress  string
+	Path           string
+	HealthPath     string
+	VarnishstatExe string
+	Params         *varnishstatParams
 
 	Verbose bool
 	NoExit  bool
@@ -71,6 +73,7 @@ func init() {
 	flag.StringVar(&StartParams.HealthPath, "web.health-path", StartParams.HealthPath, "Path under which to expose healthcheck. Disabled unless configured.")
 
 	// varnish
+	flag.StringVar(&StartParams.VarnishstatExe, "varnishstat-path", StartParams.VarnishstatExe, "Path to varnishstat.")
 	flag.StringVar(&StartParams.Params.Instance, "n", StartParams.Params.Instance, "varnishstat -n value.")
 	flag.StringVar(&StartParams.Params.VSM, "N", StartParams.Params.VSM, "varnishstat -N value.")
 

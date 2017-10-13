@@ -144,6 +144,7 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 		// see draw_line_bitmap function from https://github.com/varnishcache/varnish-cache/blob/master/bin/varnishstat/varnishstat_curses.c
 		if pName == "varnish_backend_happy" {
 			upName := "varnish_backend_up"
+			upDesc := "Backend up as per the latest health probe"
 			upValue := 0.0
 			if iValue > 0 && (iValue&uint64(1)) > 0 {
 				upValue = 1.0
@@ -154,7 +155,7 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 			if pDesc == nil {
 				pDesc = DescCache.Set(descKey, prometheus.NewDesc(
 					upName,
-					pDescription,
+					upDesc,
 					pLabelKeys,
 					nil,
 				))

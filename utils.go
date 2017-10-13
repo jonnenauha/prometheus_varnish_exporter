@@ -116,3 +116,16 @@ func fileExists(path string) bool {
 	}
 	return true
 }
+
+// data
+
+func stringProperty(data map[string]interface{}, key string) (string, error) {
+	if value, ok := data[key]; ok {
+		if vStr, ok := value.(string); ok {
+			return vStr, nil
+		} else {
+			return "", fmt.Errorf("%s is not a string", key)
+		}
+	}
+	return "", nil
+}

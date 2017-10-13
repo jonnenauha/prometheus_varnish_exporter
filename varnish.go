@@ -16,9 +16,30 @@ import (
 )
 
 var (
-	descCache  = make(map[string]*prometheus.Desc)
-	mDescCache sync.RWMutex
+	DescCache = &descCache{
+		descs: make(map[string]*prometheus.Desc),
+	}
 )
+
+type descCache struct {
+	sync.RWMutex
+
+	descs map[string]*prometheus.Desc
+}
+
+func (dc *descCache) Desc(key string) *prometheus.Desc {
+	dc.RLock()
+	desc := dc.descs[key]
+	dc.RUnlock()
+	return desc
+}
+
+func (dc *descCache) Set(key string, desc *prometheus.Desc) *prometheus.Desc {
+	dc.Lock()
+	dc.descs[key] = desc
+	dc.Unlock()
+	return desc
+}
 
 func ScrapeVarnish(ch chan<- prometheus.Metric) ([]byte, error) {
 	params := []string{"-j"}
@@ -41,13 +62,10 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 	// The output JSON annoyingly is not structured so that we could make a nice map[string]struct for it.
 	metricsJSON := make(map[string]interface{})
 	dec := json.NewDecoder(bytes.NewBuffer(buf))
+	dec.UseNumber()
 	if err := dec.Decode(&metricsJSON); err != nil {
 		return buf, err
 	}
-
-	// This is a bit broad but better than locking on each desc query below.
-	mDescCache.Lock()
-	defer mDescCache.Unlock()
 
 	for vName, raw := range metricsJSON {
 		if vName == "timestamp" {
@@ -71,8 +89,11 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 			vDescription string
 			vIdentifier  string
 			vValue       float64
+			iValue       uint64
 			vErr         error
 		)
+		format, _ := stringProperty(data, "format")
+
 		if value, ok := data["description"]; ok && vErr == nil {
 			if vDescription, ok = value.(string); !ok {
 				vErr = fmt.Errorf("%s description it not a string", vName)
@@ -84,7 +105,16 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 			}
 		}
 		if value, ok := data["value"]; ok && vErr == nil {
-			if vValue, ok = value.(float64); !ok {
+			if number, ok := value.(json.Number); ok {
+				if vValue, vErr = number.Float64(); vErr != nil {
+					vErr = fmt.Errorf("%s value float64 error: %s", vName, vErr)
+				}
+				if format == "b" {
+					if iValue, vErr = strconv.ParseUint(number.String(), 10, 64); vErr != nil {
+						vErr = fmt.Errorf("%s value uint64 error: %s", vName, vErr)
+					}
+				}
+			} else {
 				vErr = fmt.Errorf("%s value it not a float64", vName)
 			}
 		}
@@ -98,17 +128,39 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 		pName, pDescription, pLabelKeys, pLabelValues := computePrometheusInfo(vName, vGroup, vIdentifier, vDescription)
 
 		descKey := pName + "_" + strings.Join(pLabelKeys, "_")
-		pDesc, ok := descCache[descKey]
-		if !ok {
-			pDesc = prometheus.NewDesc(
+		pDesc := DescCache.Desc(descKey)
+		if pDesc == nil {
+			pDesc = DescCache.Set(descKey, prometheus.NewDesc(
 				pName,
 				pDescription,
 				pLabelKeys,
 				nil,
-			)
-			descCache[descKey] = pDesc
+			))
 		}
 		ch <- prometheus.MustNewConstMetric(pDesc, prometheus.GaugeValue, vValue, pLabelValues...)
+
+		// augment varnish_backend_up from _happy varnish bitmap value
+		// we are only interested in the latest happy value (up or down) on each scrape
+		// see draw_line_bitmap function from https://github.com/varnishcache/varnish-cache/blob/master/bin/varnishstat/varnishstat_curses.c
+		if pName == "varnish_backend_happy" {
+			upName := "varnish_backend_up"
+			upValue := 0.0
+			if iValue > 0 && (iValue&uint64(1)) > 0 {
+				upValue = 1.0
+			}
+
+			descKey = upName + "_" + strings.Join(pLabelKeys, "_")
+			pDesc = DescCache.Desc(descKey)
+			if pDesc == nil {
+				pDesc = DescCache.Set(descKey, prometheus.NewDesc(
+					upName,
+					pDescription,
+					pLabelKeys,
+					nil,
+				))
+			}
+			ch <- prometheus.MustNewConstMetric(pDesc, prometheus.GaugeValue, upValue, pLabelValues...)
+		}
 	}
 	return buf, nil
 }

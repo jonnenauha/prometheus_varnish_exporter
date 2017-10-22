@@ -23,7 +23,7 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-tar -cvzf ./bin/release/dashboards-$VERSION.tar.gz dashboards/*
+tar -cvzf ./bin/release/dashboards-$VERSION.tar.gz dashboards/* > /dev/null 2>&1
 
 for goos in linux darwin windows freebsd openbsd netbsd ; do
     for goarch in amd64 386; do

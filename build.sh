@@ -23,6 +23,8 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
+tar -cvzf ./bin/release/dashboards-$VERSION.tar.gz dashboards/*
+
 for goos in linux darwin windows freebsd openbsd netbsd ; do
     for goarch in amd64 386; do
         # path

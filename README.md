@@ -2,7 +2,7 @@
 
 # Varnish exporter for Prometheus
 
-![Grafana example](.github/grafana.png)
+![Grafana example](dashboards/jonnenauha/dashboard.png)
 
 Scrapes the `varnishstat -j` JSON output on each Prometheus collect and exposes all reported metrics. Metrics with multiple backends or varnish defined identifiers (e.g. `VBE.*.happy SMA.*.c_bytes LCK.*.creat`) and other metrics with similar structure (e.g. `MAIN.fetch_*`) are combined under a single metric name with distinguishable labels. Vanish naming conventions are preserved as much as possible to be familiar to Varnish users when building queries, while at the same time trying to following Prometheus conventions like lower casing and using `_` separators.
 
@@ -24,26 +24,9 @@ To test that `varnishstat` is found on the host machine and to preview all expor
 
     prometheus_varnish_exporter -test
 
-# Grafana examples
+# Grafana dashboards
 
-Here are some of the queries that I used to create Grafana dashboards with Prometheus data exported by this exporter. I am fairly new to Prometheus so these examples might be not be optimal, but will get you started. If you are monitoring multiple Varnish instances, you need make the queries more detailed with Prometheus label selectors.
-
-I'd be interested in Grafana dahsboard .json exports or Prometheus queries you make with this exporter. Perhaps we could make a wiki page of examples and premade generic dashboards.
-
-    // Frontend requests
-    irate(varnish_main_client_req[5m])
-
-    // Frontend requests
-    irate(varnish_main_backend_req[5m])
-
-    // Network bytes frontend
-    irate(varnish_main_s_resp_hdrbytes[5m]) + irate(varnish_main_s_resp_bodybytes[5m])
-
-    // Network bytes per backend
-    sum by (backend) keep_common (irate(varnish_backend_beresp_hdrbytes[5m]) + irate(varnish_backend_beresp_bodybytes[5m]))
-
-    // Free memory (malloc allocator)
-    varnish_sma_g_space{type="s0"}
+You can download my dashboard seen in the above picture [here](dashboards/jonnenauha/dashboard.json). I use it at work with our production Varnish instances. I would be interested in your dashboards if you wish to share them or improvement ideas to my current one.
 
 # Varnish 4 and VCL UUIDs
 

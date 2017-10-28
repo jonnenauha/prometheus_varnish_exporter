@@ -165,9 +165,12 @@ func main() {
 		registry := prometheus.NewRegistry()
 		registry.Register(PrometheusExporter)
 		handler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
+		//metrics
 		http.Handle(StartParams.Path, handler)
 	} else {
 		prometheus.MustRegister(PrometheusExporter)
+		// metrics
+		http.Handle(StartParams.Path, prometheus.Handler())
 	}
 
 	if StartParams.Path != "/" {
@@ -189,8 +192,6 @@ func main() {
 			fmt.Fprintln(w, "Ok")
 		})
 	}
-	// metrics
-	http.Handle(StartParams.Path, prometheus.Handler())
 	logFatalError(http.ListenAndServe(StartParams.ListenAddress, nil))
 }
 

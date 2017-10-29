@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -43,6 +44,7 @@ type startParams struct {
 	NoExit  bool
 	Test    bool
 	Raw     bool
+	Nogo    bool
 }
 
 type varnishstatParams struct {
@@ -84,6 +86,7 @@ func init() {
 	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging.")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
+	flag.BoolVar(&StartParams.Nogo, "no-go-metrics", StartParams.Nogo, "Don't export go runtime and http handler metrics")
 
 	flag.Parse()
 
@@ -158,7 +161,17 @@ func main() {
 	// Start serving
 	logInfo("Server starting on %s with metrics path %s", StartParams.ListenAddress, StartParams.Path)
 
-	prometheus.MustRegister(PrometheusExporter)
+	if StartParams.Nogo {
+		registry := prometheus.NewRegistry()
+		registry.Register(PrometheusExporter)
+		handler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
+		//metrics
+		http.Handle(StartParams.Path, handler)
+	} else {
+		prometheus.MustRegister(PrometheusExporter)
+		// metrics
+		http.Handle(StartParams.Path, prometheus.Handler())
+	}
 
 	if StartParams.Path != "/" {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -179,8 +192,6 @@ func main() {
 			fmt.Fprintln(w, "Ok")
 		})
 	}
-	// metrics
-	http.Handle(StartParams.Path, prometheus.Handler())
 	logFatalError(http.ListenAndServe(StartParams.ListenAddress, nil))
 }
 

@@ -23,6 +23,17 @@ type prometheusExporter struct {
 }
 
 func NewPrometheusExporter() *prometheusExporter {
+	extralabel_vals := exlv.getLabelValues()
+	if len(extralabel_vals) > 0 {
+		return &prometheusExporter{
+			up: prometheus.NewGauge(prometheus.GaugeOpts{
+				Namespace:   exporterNamespace,
+				Name:        "up",
+				Help:        "Was the last scrape of varnish successful.",
+				ConstLabels: extralabel_vals,
+			}),
+		}
+	}
 	return &prometheusExporter{
 		up: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: exporterNamespace,
@@ -33,11 +44,18 @@ func NewPrometheusExporter() *prometheusExporter {
 }
 
 func (pe *prometheusExporter) Initialize() error {
+	constl := VarnishVersion.Labels()
+	extralabel_vals := exlv.getLabelValues()
+	if len(extralabel_vals) > 0 {
+		for l, v := range extralabel_vals {
+			constl[l] = v
+		}
+	}
 	pe.version = prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace:   exporterNamespace,
 		Name:        "version",
 		Help:        "Varnish version information",
-		ConstLabels: VarnishVersion.Labels(),
+		ConstLabels: constl,
 	})
 	pe.version.Set(1)
 	return nil

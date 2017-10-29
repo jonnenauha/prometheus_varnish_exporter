@@ -124,11 +124,15 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 			}
 			continue
 		}
-
 		pName, pDescription, pLabelKeys, pLabelValues := computePrometheusInfo(vName, vGroup, vIdentifier, vDescription)
 
 		descKey := pName + "_" + strings.Join(pLabelKeys, "_")
 		pDesc := DescCache.Desc(descKey)
+		extra_label_vals := exlv.getLabelValues()
+		for l, v := range extra_label_vals {
+			pLabelKeys = append(pLabelKeys, l)
+			pLabelValues = append(pLabelValues, v)
+		}
 		if pDesc == nil {
 			pDesc = DescCache.Set(descKey, prometheus.NewDesc(
 				pName,

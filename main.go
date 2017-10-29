@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -19,15 +20,16 @@ var (
 	VersionHash     string
 	VersionDate     string
 
-	PrometheusExporter = NewPrometheusExporter()
-	VarnishVersion     = NewVarnishVersion()
-	ExitHandler        = &exitHandler{}
+	VarnishVersion = NewVarnishVersion()
+	ExitHandler    = &exitHandler{}
+	exlv           = newExtraLabelValues()
 
 	StartParams = &startParams{
 		ListenAddress:  ":9131", // Reserved and publicly announced at https://github.com/prometheus/prometheus/wiki/Default-port-allocations
 		Path:           "/metrics",
 		VarnishstatExe: "varnishstat",
 		Params:         &varnishstatParams{},
+		Nogo:           true,
 	}
 	logger *log.Logger
 )
@@ -39,10 +41,14 @@ type startParams struct {
 	VarnishstatExe string
 	Params         *varnishstatParams
 
-	Verbose bool
-	NoExit  bool
-	Test    bool
-	Raw     bool
+	Verbose        bool
+	NoExit         bool
+	Test           bool
+	Raw            bool
+	Nogo           bool
+	VarnishAddress string
+	Environment    string
+	NeedEnv        bool
 }
 
 type varnishstatParams struct {
@@ -84,6 +90,10 @@ func init() {
 	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging.")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
+	flag.BoolVar(&StartParams.Nogo, "no-go-metrics", StartParams.Nogo, "Don't export go runtime and http handler metrics")
+	flag.StringVar(&StartParams.VarnishAddress, "varnish-address", "127.0.0.1", "Ip of the varnish process")
+	flag.StringVar(&StartParams.Environment, "environment", "production", "Environment indicator: stage, dev, production etc.")
+	flag.BoolVar(&StartParams.NeedEnv, "envlabelneeded", false, "Need environment, varnish addressed details label")
 
 	flag.Parse()
 
@@ -111,10 +121,16 @@ func init() {
 }
 
 func main() {
+	var exporter *prometheusExporter
+
 	if b, err := json.MarshalIndent(StartParams, "", "  "); err == nil {
 		logInfo("%s %s %s", ApplicationName, getVersion(false), b)
 	} else {
 		logFatal(err.Error())
+	}
+	if StartParams.NeedEnv {
+		exlv.add("addr", StartParams.VarnishAddress)
+		exlv.add("env", StartParams.Environment)
 	}
 
 	// Initialize
@@ -123,7 +139,8 @@ func main() {
 	}
 	if VarnishVersion.Valid() {
 		logInfo("Found varnishstat %s", VarnishVersion)
-		if err := PrometheusExporter.Initialize(); err != nil {
+		exporter = NewPrometheusExporter()
+		if err := exporter.Initialize(); err != nil {
 			logFatal("Prometheus exporter initialize failed: %s", err.Error())
 		}
 	}
@@ -158,7 +175,17 @@ func main() {
 	// Start serving
 	logInfo("Server starting on %s with metrics path %s", StartParams.ListenAddress, StartParams.Path)
 
-	prometheus.MustRegister(PrometheusExporter)
+	if StartParams.Nogo {
+		registry := prometheus.NewRegistry()
+		registry.Register(exporter)
+		handler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
+		//metrics
+		http.Handle(StartParams.Path, handler)
+	} else {
+		prometheus.MustRegister(exporter)
+		// metrics
+		http.Handle(StartParams.Path, prometheus.Handler())
+	}
 
 	if StartParams.Path != "/" {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -179,8 +206,6 @@ func main() {
 			fmt.Fprintln(w, "Ok")
 		})
 	}
-	// metrics
-	http.Handle(StartParams.Path, prometheus.Handler())
 	logFatalError(http.ListenAndServe(StartParams.ListenAddress, nil))
 }
 

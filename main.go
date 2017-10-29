@@ -40,11 +40,11 @@ type startParams struct {
 	VarnishstatExe string
 	Params         *varnishstatParams
 
-	Verbose bool
-	NoExit  bool
-	Test    bool
-	Raw     bool
-	Nogo    bool
+	Verbose       bool
+	NoExit        bool
+	Test          bool
+	Raw           bool
+	WithGoMetrics bool
 }
 
 type varnishstatParams struct {
@@ -86,7 +86,7 @@ func init() {
 	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging.")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
-	flag.BoolVar(&StartParams.Nogo, "no-go-metrics", StartParams.Nogo, "Don't export go runtime and http handler metrics")
+	flag.BoolVar(&StartParams.WithGoMetrics, "with-go-metrics", StartParams.WithGoMetrics, "Export go runtime and http handler metrics")
 
 	flag.Parse()
 
@@ -161,15 +161,17 @@ func main() {
 	// Start serving
 	logInfo("Server starting on %s with metrics path %s", StartParams.ListenAddress, StartParams.Path)
 
-	if StartParams.Nogo {
+	if !StartParams.WithGoMetrics {
 		registry := prometheus.NewRegistry()
-		registry.Register(PrometheusExporter)
-		handler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
-		//metrics
+		if err := registry.Register(PrometheusExporter); err != nil {
+			logFatal("registry.Register failed: %s", err.Error())
+		}
+		handler := promhttp.HandlerFor(registry, promhttp.HandlerOpts{
+			ErrorLog: logger,
+		})
 		http.Handle(StartParams.Path, handler)
 	} else {
 		prometheus.MustRegister(PrometheusExporter)
-		// metrics
 		http.Handle(StartParams.Path, prometheus.Handler())
 	}
 

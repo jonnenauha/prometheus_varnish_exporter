@@ -1,11 +1,11 @@
 1.4
 ===
-* Standard non Varnish prometheus metrics need to now be enabled with `-with-go-metrics`. Before they were included by default. Now dropped to export less clutter that majority of users will never need.
+* Standard non Varnish prometheus metrics need to now be enabled with `-with-go-metrics`. Before they were included by default. Now dropped to export less clutter that majority of users will never need (@nipuntalukdar).
 
 1.3.4
 =====
 * New per backend metric `varnish_backend_up` with 1/0 value that reflects the latest health probe result. The Varnish bitmap uint64 `varnish_backend_happy` as a prometheus float metric was not that useful in detecting latest up/down per backend.
-* Ability to give custom path to varnishstat with `-varnishstat-path` (by @zstyblik)
+* Ability to give custom path to varnishstat with `-varnishstat-path` (@zstyblik)
 * Github releases now include Grafana dashboards archive. This includes all the dashboards posted by users in the repo, starting with my own.
 
 1.3.3

@@ -1,6 +1,7 @@
 1.4
 ===
 * Standard non Varnish prometheus metrics need to now be enabled with `-with-go-metrics`. Before they were included by default. Now dropped to export less clutter that majority of users will never need (@nipuntalukdar).
+* Fix `varnish_backend_up` with Varnish 4.0 and earlier versions.
 
 1.3.4
 =====

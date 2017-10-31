@@ -92,7 +92,7 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 			iValue       uint64
 			vErr         error
 		)
-		format, _ := stringProperty(data, "format")
+		flag, _ := stringProperty(data, "flag")
 
 		if value, ok := data["description"]; ok && vErr == nil {
 			if vDescription, ok = value.(string); !ok {
@@ -109,7 +109,7 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 				if vValue, vErr = number.Float64(); vErr != nil {
 					vErr = fmt.Errorf("%s value float64 error: %s", vName, vErr)
 				}
-				if format == "b" {
+				if flag == "b" {
 					if iValue, vErr = strconv.ParseUint(number.String(), 10, 64); vErr != nil {
 						vErr = fmt.Errorf("%s value uint64 error: %s", vName, vErr)
 					}

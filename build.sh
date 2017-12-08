@@ -60,3 +60,7 @@ for goos in linux darwin windows freebsd openbsd netbsd ; do
         echo "  > `du -hc $path | awk 'NR==1{print $1;}'`    $path"
     done
 done
+
+cd ./bin/release
+sha256sum --binary ./* | sed -En "s/\*\.\/(.*)$/\1/p" > sha256sums.txt
+cd ../..

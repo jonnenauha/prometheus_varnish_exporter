@@ -10,7 +10,7 @@ Handles runtime Varnish changes like adding new backends via vlc reload. Removed
 
 Advanced users can use `-n -N`, they are passed to `varnishstat`.
 
-I have personally tested the following versions of Varnish to work `5.2, 5.1.2, 4.1.1, 4.1.0, 4.0.3 and 3.0.5`. Missing category groupings in 3.x like `MAIN.` are detected and added automatically for label names to be consistent across versions, assuming of course that the Varnish project does not remove/change the stats.
+I have personally tested the following versions of Varnish to work `6.0.0, 5.2.1, 5.1.2, 4.1.1, 4.1.0, 4.0.3 and 3.0.5`. Missing category groupings in 3.x like `MAIN.` are detected and added automatically for label names to be consistent across versions, assuming of course that the Varnish project does not remove/change the stats.
 
 I won't make any backwards compatibility promises at this point. Your built queries can break on new versions if metric names or labels are refined. If you find bugs or have feature requests feel free to create issues or send PRs.
 
@@ -18,11 +18,17 @@ I won't make any backwards compatibility promises at this point. Your built quer
 
 You can find the latest binary releases for linux, darwin, windows, freebsd, openbsd and netbsd  from the [github releases page](https://github.com/jonnenauha/prometheus_varnish_exporter/releases).
 
-See `prometheus_varnish_exporter -h` for available options.
+See `prometheus_varnish_exporter -h` for available options. It is recommended to use `-no-exit` in production to not exit the process on failed scrapes. Note that if Varnish is not running, `varnishstat` will still produce a successful scrape.
 
 To test that `varnishstat` is found on the host machine and to preview all exported metrics run
 
     prometheus_varnish_exporter -test
+
+# Docker
+
+Scraping metrics from Varnish running in a docker container is possible since 1.4.1. I still don't have a easy, clear and user friendly way of running this exporter in a docker container, if you have any ideas open a issue. Resolve your Varnish container name with `docker ps` and run the following. This will use `docker exec <container-name>` to execute varnishstat inside the spesified container.
+
+    prometheus_varnish_exporter -no-exit -docker-container-name <container_name>
 
 # Grafana dashboards
 
@@ -48,9 +54,3 @@ To aggregate all loaded VCLs into per-backend metric the following Prometheus [r
 # Build
 
 Use `go build` or `./build.sh <version>` for cross compilation.
-
-# Docker notes
-
-Building a docker image would not be useful for this application. It operates by executing the `varnishstat` tool. This executable is of course not available inside the exporters container. We could install and run Varnish inside the same container, but this would make little sense and be harder to manage.
-
-I do not know of a way to get the varnish stats over the network (--net="host" could be used to talk to it). If you have more info on this, please open an issue.

@@ -1,6 +1,8 @@
 1.4.1
 =====
 * `-docker-container-name` to signal that `varnishstat` should be ran in a docker container with `docker exec <container-name>` .
+* Support Varnish 6.0.0 by testing the main logic works and metrics are exported.
+* Start building releases with go 1.10.3
 
 1.4
 ===

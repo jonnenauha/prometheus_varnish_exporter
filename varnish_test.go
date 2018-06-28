@@ -14,6 +14,9 @@ import (
 
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{
+		"varnishstat (varnish-6.0.0 revision a068361dff0d25a0d85cf82a6e5fdaf315e06a7d)": &varnishVersion{
+			Major: 6, Minor: 0, Patch: 0, Revision: "a068361dff0d25a0d85cf82a6e5fdaf315e06a7d",
+		},
 		"varnishstat (varnish-5.2.0 revision 4c4875cbf)": &varnishVersion{
 			Major: 5, Minor: 2, Patch: 0, Revision: "4c4875cbf",
 		},
@@ -141,6 +144,7 @@ func Test_VarnishMetrics(t *testing.T) {
 	for _, test := range []string{
 		filepath.Join(dir, "test/scrape", "4.1.1.json"),
 		filepath.Join(dir, "test/scrape", "5.2.0.json"),
+		filepath.Join(dir, "test/scrape", "6.0.0.json"),
 	} {
 		version := strings.Replace(filepath.Base(test), ".json", "", -1)
 		VarnishVersion.parseVersion(version)

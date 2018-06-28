@@ -1,3 +1,7 @@
+1.4.1
+=====
+* `-docker-container-name` to signal that `varnishstat` should be ran in a docker container with `docker exec <container-name>` .
+
 1.4
 ===
 * Standard non Varnish prometheus metrics need to now be enabled with `-with-go-metrics`. Before they were included by default. Now dropped to export less clutter that majority of users will never need (@nipuntalukdar).

@@ -34,11 +34,12 @@ var (
 )
 
 type startParams struct {
-	ListenAddress  string
-	Path           string
-	HealthPath     string
-	VarnishstatExe string
-	Params         *varnishstatParams
+	ListenAddress          string
+	Path                   string
+	HealthPath             string
+	VarnishstatExe         string
+	VarnishDockerContainer string
+	Params                 *varnishstatParams
 
 	Verbose       bool
 	NoExit        bool
@@ -78,6 +79,9 @@ func init() {
 	flag.StringVar(&StartParams.VarnishstatExe, "varnishstat-path", StartParams.VarnishstatExe, "Path to varnishstat.")
 	flag.StringVar(&StartParams.Params.Instance, "n", StartParams.Params.Instance, "varnishstat -n value.")
 	flag.StringVar(&StartParams.Params.VSM, "N", StartParams.Params.VSM, "varnishstat -N value.")
+
+	// docker
+	flag.StringVar(&StartParams.VarnishDockerContainer, "docker-container-name", StartParams.VarnishDockerContainer, "Docker container name to exec varnishstat in.")
 
 	// modes
 	version := false

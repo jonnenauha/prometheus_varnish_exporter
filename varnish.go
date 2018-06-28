@@ -169,7 +169,12 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 // Returns the result of 'varnishtat' with optional command line params.
 func executeVarnishstat(varnishstatExe string, params ...string) (*bytes.Buffer, error) {
 	buf := &bytes.Buffer{}
-	cmd := exec.Command(varnishstatExe, params...)
+	var cmd *exec.Cmd
+	if len(StartParams.VarnishDockerContainer) == 0 {
+		cmd = exec.Command(varnishstatExe, params...)
+	} else {
+		cmd = exec.Command("docker", append([]string{"exec", "-t", StartParams.VarnishDockerContainer, varnishstatExe}, params...)...)
+	}
 	cmd.Stdout = buf
 	cmd.Stderr = buf
 	return buf, cmd.Run()

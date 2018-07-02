@@ -53,4 +53,24 @@ To aggregate all loaded VCLs into per-backend metric the following Prometheus [r
 
 # Build
 
-Use `go build` or `./build.sh <version>` for cross compilation.
+**One time setup**
+1. [Install go](https://golang.org/doc/install) or use OS repos `golang` package.
+2. Make a directory e.g. `~/go-workspace` for go development and set it to env variable `GOPATH`.
+
+**Development**
+```bash
+# clone
+mkdir mkdir -p $GOPATH/src/github.com/jonnenauha
+cd $GOPATH/src/github.com/jonnenauha
+git clone git@github.com:jonnenauha/prometheus_varnish_exporter.git
+cd prometheus_varnish_exporter
+
+# build
+go get -v   # get deps
+go build    # build binary to current directory
+
+# release with cross compilation
+./build.sh <version>
+```
+
+You can fork this repo and replace the working dir with `$GOPATH/src/github.com/<username>` and sent PRs from your development fork. Other git providers than github will also work just fine, just adapt your package dir path.

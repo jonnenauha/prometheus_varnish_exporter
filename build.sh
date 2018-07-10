@@ -62,5 +62,5 @@ for goos in linux darwin windows freebsd openbsd netbsd ; do
 done
 
 cd ./bin/release
-sha256sum --binary ./* | sed -En "s/\*\.\/(.*)$/\1/p" > sha256sums.txt
+shasum --algorithm 256 --binary ./* | sed -En "s/\*\.\/(.*)$/\1/p" > sha256sums.txt
 cd ../..

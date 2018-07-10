@@ -60,7 +60,7 @@ To aggregate all loaded VCLs into per-backend metric the following Prometheus [r
 **Development**
 ```bash
 # clone
-mkdir mkdir -p $GOPATH/src/github.com/jonnenauha
+mkdir -p $GOPATH/src/github.com/jonnenauha
 cd $GOPATH/src/github.com/jonnenauha
 git clone git@github.com:jonnenauha/prometheus_varnish_exporter.git
 cd prometheus_varnish_exporter

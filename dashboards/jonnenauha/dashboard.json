@@ -1186,7 +1186,7 @@
               "step": 60
             },
             {
-              "expr": "sum(irate(varnish_backend_beresp_hdrbytes{instance=~\"^($varnish_instance).*\"}[5m]) + irate(varnish_backend_beresp_bodybytes{instance=~\"^($varnish_instance).*\"}[5m])) keep_common",
+              "expr": "sum(irate(varnish_backend_beresp_hdrbytes{instance=~\"^($varnish_instance).*\"}[5m]) + irate(varnish_backend_beresp_bodybytes{instance=~\"^($varnish_instance).*\"}[5m]))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1197,7 +1197,7 @@
               "step": 60
             },
             {
-              "expr": "sum(irate(varnish_backend_beresp_hdrbytes{instance=~\"^($varnish_instance).*\"}[5m]) + irate(varnish_backend_beresp_bodybytes{instance=~\"^($varnish_instance).*\"}[5m])) by (backend) keep_common",
+              "expr": "sum(irate(varnish_backend_beresp_hdrbytes{instance=~\"^($varnish_instance).*\"}[5m]) + irate(varnish_backend_beresp_bodybytes{instance=~\"^($varnish_instance).*\"}[5m])) by (backend)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "backend {{ backend }}",

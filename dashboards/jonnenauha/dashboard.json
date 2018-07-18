@@ -609,7 +609,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count_scalar(varnish_backend_up{instance=~\"^($varnish_instance).*\"} == 1)",
+              "expr": "scalar(count(varnish_backend_up{instance=~\"^($varnish_instance).*\"} == 1))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 1,
@@ -691,7 +691,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count_scalar(varnish_backend_up{instance=~\"^($varnish_instance).*\"} == 0)",
+              "expr": "scalar(count(varnish_backend_up{instance=~\"^($varnish_instance).*\"} == 0))",
               "format": "time_series",
               "interval": "1m",
               "intervalFactor": 1,

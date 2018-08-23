@@ -18,7 +18,7 @@ I won't make any backwards compatibility promises at this point. Your built quer
 
 You can find the latest binary releases for linux, darwin, windows, freebsd, openbsd and netbsd  from the [github releases page](https://github.com/jonnenauha/prometheus_varnish_exporter/releases).
 
-See `prometheus_varnish_exporter -h` for available options. It is recommended to use `-no-exit` in production to not exit the process on failed scrapes. Note that if Varnish is not running, `varnishstat` will still produce a successful scrape.
+By default the exporter listens on port 9131. See `prometheus_varnish_exporter -h` for available options. It is recommended to use `-no-exit` in production to not exit the process on failed scrapes. Note that if Varnish is not running, `varnishstat` will still produce a successful scrape.
 
 To test that `varnishstat` is found on the host machine and to preview all exported metrics run
 

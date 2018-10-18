@@ -20,6 +20,9 @@ func Test_VarnishVersion(t *testing.T) {
 		"varnishstat (varnish-5.2.0 revision 4c4875cbf)": &varnishVersion{
 			Major: 5, Minor: 2, Patch: 0, Revision: "4c4875cbf",
 		},
+		"varnishstat (varnish-4.1.10 revision 1d090c5a08f41c36562644bafcce9d3cb85d824f)": &varnishVersion{
+			Major: 4, Minor: 1, Patch: 10, Revision: "1d090c5a08f41c36562644bafcce9d3cb85d824f",
+		},
 		"varnishstat (varnish-4.1.0 revision 3041728)": &varnishVersion{
 			Major: 4, Minor: 1, Patch: 0, Revision: "3041728",
 		},

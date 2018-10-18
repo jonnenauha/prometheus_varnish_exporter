@@ -224,7 +224,7 @@ func (v *varnishVersion) queryVersion() error {
 }
 
 func (v *varnishVersion) parseVersion(version string) error {
-	r := regexp.MustCompile(`(\d)\.?(\d)?\.?(\d)?(?:.*revision\s(.*)\))?`)
+	r := regexp.MustCompile(`(\d+)\.?(\d+)?\.?(\d+)?(?:.*revision\s(.*)\))?`)
 	parts := r.FindStringSubmatch(version)
 	if len(parts) > 1 {
 		if err := v.set(parts[1:]); err != nil {

@@ -224,10 +224,18 @@ func (v *varnishVersion) queryVersion() error {
 }
 
 func (v *varnishVersion) parseVersion(version string) error {
-	r := regexp.MustCompile(`(\d)\.?(\d)?\.?(\d)?(?:.*revision\s(.*)\))?`)
-	parts := r.FindStringSubmatch(version)
+	r := regexp.MustCompile(`(?P<major>\d+)(\.(?P<minor>\d+))?(\.(?P<patch>\d+))?(.*revision\s(?P<revision>[0-9a-f]*)\))?`)
+	match := r.FindStringSubmatch(version)
+
+	parts := make(map[string]string)
+	for i, name := range r.SubexpNames() {
+		if i != 0 && name != "" {
+			parts[name] = match[i]
+		}
+	}
+
 	if len(parts) > 1 {
-		if err := v.set(parts[1:]); err != nil {
+		if err := v.set(parts); err != nil {
 			return err
 		}
 	}
@@ -255,25 +263,30 @@ func (v *varnishVersion) Labels() map[string]string {
 	return labels
 }
 
-func (v *varnishVersion) set(parts []string) error {
-	for i, part := range parts {
-		if len(part) == 0 {
+func (v *varnishVersion) set(parts map[string]string) error {
+	for name, value := range parts {
+		// skip empty value
+		if len(value) == 0 {
 			continue
 		}
-		if i == 3 {
-			v.Revision = part
-			break
+
+		// save revision as-is (string)
+		if name == "revision" {
+			v.Revision = value
+			continue
 		}
-		num, err := strconv.Atoi(part)
+
+		// convert semver parts to integer and save it
+		num, err := strconv.Atoi(value)
 		if err != nil {
 			return err
 		}
-		switch i {
-		case 0:
+		switch name {
+		case "major":
 			v.Major = num
-		case 1:
+		case "minor":
 			v.Minor = num
-		case 2:
+		case "patch":
 			v.Patch = num
 		}
 	}

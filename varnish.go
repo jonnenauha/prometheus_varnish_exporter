@@ -61,10 +61,20 @@ func ScrapeVarnish(ch chan<- prometheus.Metric) ([]byte, error) {
 func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) {
 	// The output JSON annoyingly is not structured so that we could make a nice map[string]struct for it.
 	metricsJSON := make(map[string]interface{})
+	metricsJSON_raw := make(map[string]interface{})
+
+	reFancyChar := regexp.MustCompile("[^a-zA-Z_]")
+	reUnderscore := regexp.MustCompile("^(__|[0-9])")
 	dec := json.NewDecoder(bytes.NewBuffer(buf))
 	dec.UseNumber()
-	if err := dec.Decode(&metricsJSON); err != nil {
+	if err := dec.Decode(&metricsJSON_raw); err != nil {
 		return buf, err
+	}
+
+	for vName, raw := range metricsJSON_raw {
+		newName := reFancyChar.ReplaceAllString(vName, "_")
+		newName = reUnderscore.ReplaceAllString(newName, "a$1")
+		metricsJSON[newName] = raw
 	}
 
 	for vName, raw := range metricsJSON {

@@ -1514,5 +1514,20 @@
     "description": "Backend requests sent",
     "flag": "c", "format": "i",
     "value": 0
+  },
+  "TEST.#_character": {
+    "description": "Try to trip the parser",
+    "flag": "c", "format": "i",
+    "value": 0
+  },
+  "__TEST.double_underscores": {
+    "description": "Try to trip the parser",
+    "flag": "c", "format": "i",
+    "value": 0
+  },
+  "0TEST.number": {
+    "description": "Try to trip the parser",
+    "flag": "c", "format": "i",
+    "value": 0
   }
 }

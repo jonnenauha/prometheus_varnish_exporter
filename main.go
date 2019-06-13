@@ -176,7 +176,7 @@ func main() {
 		http.Handle(StartParams.Path, handler)
 	} else {
 		prometheus.MustRegister(PrometheusExporter)
-		http.Handle(StartParams.Path, prometheus.Handler())
+		http.Handle(StartParams.Path, promhttp.Handler())
 	}
 
 	if StartParams.Path != "/" {

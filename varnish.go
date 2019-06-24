@@ -137,7 +137,18 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 				nil,
 			))
 		}
-		ch <- prometheus.MustNewConstMetric(pDesc, prometheus.GaugeValue, vValue, pLabelValues...)
+
+		var metricType prometheus.ValueType
+		switch flag {
+		case "c":
+			metricType = prometheus.CounterValue
+		case "g":
+			metricType = prometheus.GaugeValue
+		default:
+			metricType = prometheus.GaugeValue
+		}
+
+		ch <- prometheus.MustNewConstMetric(pDesc, metricType, vValue, pLabelValues...)
 
 		// augment varnish_backend_up from _happy varnish bitmap value
 		// we are only interested in the latest happy value (up or down) on each scrape

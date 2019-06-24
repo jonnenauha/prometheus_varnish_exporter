@@ -1,7 +1,7 @@
 1.5
 ===
-* Deprecate `-no-exit`. Default behavior is not to exit on scrape errors as it should be for a long running HTTP server.
-  * This was design misstep. You will not get a deprecation warning if you pass `-no-exit` but the process behaves as before.
+* Deprecate `-no-exit`. Default behavior is now not to exit on scrape errors as it should be for a long running HTTP server.
+  * This was design misstep. You will now get a deprecation warning if you pass `-no-exit` but the process behaves as before.
   * New explicit `-exit-on-errors` has been added for users who want the old default behavior back.
 * Correctly export gauge and counter types from `varnishstat` output `type` property.
 * Add go module support.

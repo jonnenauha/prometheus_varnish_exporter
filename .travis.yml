@@ -13,7 +13,7 @@ before_script:
   - varnishstat -V
 
 script:
-  - go build
+  - go build -v
   - sudo $GOROOT/bin/go test -v ./...
 
 after_success:

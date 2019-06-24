@@ -16,9 +16,9 @@ I won't make any backwards compatibility promises at this point. Your built quer
 
 # Installing and running
 
-You can find the latest binary releases for linux, darwin, windows, freebsd, openbsd and netbsd  from the [github releases page](https://github.com/jonnenauha/prometheus_varnish_exporter/releases).
+You can find the latest binary releases for linux, darwin, windows, freebsd, openbsd and netbsd from the [github releases page](https://github.com/jonnenauha/prometheus_varnish_exporter/releases).
 
-By default the exporter listens on port 9131. See `prometheus_varnish_exporter -h` for available options. It is recommended to use `-no-exit` in production to not exit the process on failed scrapes. Note that if Varnish is not running, `varnishstat` will still produce a successful scrape.
+By default the exporter listens on port 9131. See `prometheus_varnish_exporter -h` for available options.
 
 To test that `varnishstat` is found on the host machine and to preview all exported metrics run
 
@@ -26,9 +26,11 @@ To test that `varnishstat` is found on the host machine and to preview all expor
 
 # Docker
 
-Scraping metrics from Varnish running in a docker container is possible since 1.4.1. I still don't have a easy, clear and user friendly way of running this exporter in a docker container, if you have any ideas open a issue. Resolve your Varnish container name with `docker ps` and run the following. This will use `docker exec <container-name>` to execute varnishstat inside the spesified container.
+Scraping metrics from Varnish running in a docker container is possible since 1.4.1. Resolve your Varnish container name with `docker ps` and run the following. This will use `docker exec <container-name>` to execute varnishstat inside the spesified container.
 
-    prometheus_varnish_exporter -no-exit -docker-container-name <container_name>
+    prometheus_varnish_exporter -docker-container-name <container_name>
+
+I still don't have a easy, clear and user friendly way of running this exporter in a docker container. For community efforts and solutions see [this issue](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/25#issuecomment-492546458).
 
 # Grafana dashboards
 
@@ -54,23 +56,22 @@ To aggregate all loaded VCLs into per-backend metric the following Prometheus [r
 # Build
 
 **One time setup**
-1. [Install go](https://golang.org/doc/install) or use OS repos `golang` package.
-2. Make a directory e.g. `~/go-workspace` for go development and set it to env variable `GOPATH`.
+
+This repot support go modules so out of `GOPATH` builds are supported. This makes development and buildings easier for go "novices".
+
+You need go 1.11 or higher, otherwise you can keep using `GOPATH` based development ([see old README](https://github.com/jonnenauha/prometheus_varnish_exporter/blob/1.4.1/README.md#build)).
+
+1. [Install latest go](https://golang.org/doc/install) or use OS repos `golang` package.
 
 **Development**
 ```bash
 # clone
-mkdir -p $GOPATH/src/github.com/jonnenauha
-cd $GOPATH/src/github.com/jonnenauha
 git clone git@github.com:jonnenauha/prometheus_varnish_exporter.git
 cd prometheus_varnish_exporter
 
-# build
-go get -v   # get deps
-go build    # build binary to current directory
+# build binary to current directory
+go build
 
 # release with cross compilation
 ./build.sh <version>
 ```
-
-You can fork this repo and replace the working dir with `$GOPATH/src/github.com/<username>` and sent PRs from your development fork. Other git providers than github will also work just fine, just adapt your package dir path.

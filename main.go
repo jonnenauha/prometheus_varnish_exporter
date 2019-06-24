@@ -42,10 +42,12 @@ type startParams struct {
 	Params                 *varnishstatParams
 
 	Verbose       bool
-	NoExit        bool
+	ExitOnErrors  bool
 	Test          bool
 	Raw           bool
 	WithGoMetrics bool
+
+	noExit bool // deprecated
 }
 
 type varnishstatParams struct {
@@ -86,11 +88,14 @@ func init() {
 	// modes
 	version := false
 	flag.BoolVar(&version, "version", version, "Print version and exit")
-	flag.BoolVar(&StartParams.NoExit, "no-exit", StartParams.NoExit, "Do not exit server on Varnish scrape errors.")
+	flag.BoolVar(&StartParams.ExitOnErrors, "exit-on-errors", StartParams.ExitOnErrors, "Exit process on scrape errors.")
 	flag.BoolVar(&StartParams.Verbose, "verbose", StartParams.Verbose, "Verbose logging.")
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
 	flag.BoolVar(&StartParams.WithGoMetrics, "with-go-metrics", StartParams.WithGoMetrics, "Export go runtime and http handler metrics")
+
+	// deprecated
+	flag.BoolVar(&StartParams.noExit, "no-exit", StartParams.noExit, "Deprecated: see -exit-on-errors")
 
 	flag.Parse()
 
@@ -111,10 +116,13 @@ func init() {
 		logFatal("-web.telemetry-path and -web.health-path cannot have same value")
 	}
 
-	// This looks weird, but we want the start param to have default value
-	// of the old behavior, not flip it with e.g. -exit. You have to
-	// explicitly turn on the changed behavior.
-	ExitHandler.exitOnError = StartParams.Test == true || StartParams.NoExit == false
+	// Don't log warning on !noExit as that would spam for the formed default value.
+	if StartParams.noExit {
+		logWarn("-no-exit is deprecated. As of v1.5 it is the default behavior not to exit process on scrape errors. You can remove this parameter.")
+	}
+
+	// Test run or user explicitly wants to exit on any scrape errors during runtime.
+	ExitHandler.exitOnError = StartParams.Test == true || StartParams.ExitOnErrors == true
 }
 
 func main() {

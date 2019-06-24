@@ -1,3 +1,10 @@
+1.5
+===
+* Correctly export gauge and counter types from `varnishstat` output `type` property.
+* Add go module support.
+* Use `github.com/prometheus/client_golang` v1.0.0
+* Start building releases with go 1.12.6
+
 1.4.1
 =====
 * `-docker-container-name` to signal that `varnishstat` should be ran in a docker container with `docker exec <container-name>` .

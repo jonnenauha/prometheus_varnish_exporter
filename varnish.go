@@ -140,6 +140,8 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 
 		var metricType prometheus.ValueType
 		switch flag {
+		case "a":
+			metricType = prometheus.CounterValue
 		case "c":
 			metricType = prometheus.CounterValue
 		case "g":

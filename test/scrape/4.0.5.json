@@ -1,0 +1,1928 @@
+{
+    "timestamp": "2019-07-31T23:56:36",
+    "MAIN.uptime": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Child process uptime"
+    },
+    "MAIN.sess_conn": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Sessions accepted"
+    },
+    "MAIN.sess_drop": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Sessions dropped"
+    },
+    "MAIN.sess_fail": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Session accept failures"
+    },
+    "MAIN.sess_pipe_overflow": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Session pipe overflow"
+    },
+    "MAIN.client_req_400": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Client requests received, subject to 400 errors"
+    },
+    "MAIN.client_req_411": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Client requests received, subject to 411 errors"
+    },
+    "MAIN.client_req_413": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Client requests received, subject to 413 errors"
+    },
+    "MAIN.client_req_417": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Client requests received, subject to 417 errors"
+    },
+    "MAIN.client_req": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Good client requests received"
+    },
+    "MAIN.cache_hit": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Cache hits"
+    },
+    "MAIN.cache_hitpass": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Cache hits for pass"
+    },
+    "MAIN.cache_miss": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Cache misses"
+    },
+    "MAIN.backend_conn": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. success"
+    },
+    "MAIN.backend_unhealthy": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. not attempted"
+    },
+    "MAIN.backend_busy": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. too many"
+    },
+    "MAIN.backend_fail": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. failures"
+    },
+    "MAIN.backend_reuse": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. reuses"
+    },
+    "MAIN.backend_toolate": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. was closed"
+    },
+    "MAIN.backend_recycle": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. recycles"
+    },
+    "MAIN.backend_retry": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend conn. retry"
+    },
+    "MAIN.fetch_head": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch no body (HEAD)"
+    },
+    "MAIN.fetch_length": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch with Length"
+    },
+    "MAIN.fetch_chunked": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch chunked"
+    },
+    "MAIN.fetch_eof": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch EOF"
+    },
+    "MAIN.fetch_bad": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch bad T-E"
+    },
+    "MAIN.fetch_close": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch wanted close"
+    },
+    "MAIN.fetch_oldhttp": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch pre HTTP/1.1 closed"
+    },
+    "MAIN.fetch_zero": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch zero len body"
+    },
+    "MAIN.fetch_1xx": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch no body (1xx)"
+    },
+    "MAIN.fetch_204": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch no body (204)"
+    },
+    "MAIN.fetch_304": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch no body (304)"
+    },
+    "MAIN.fetch_failed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch failed (all causes)"
+    },
+    "MAIN.fetch_no_thread": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Fetch failed (no thread)"
+    },
+    "MAIN.pools": {
+        "type": "MAIN",
+        "value": 2,
+        "flag": "g",
+        "description": "Number of thread pools"
+    },
+    "MAIN.threads": {
+        "type": "MAIN",
+        "value": 200,
+        "flag": "g",
+        "description": "Total number of threads"
+    },
+    "MAIN.threads_limited": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Threads hit max"
+    },
+    "MAIN.threads_created": {
+        "type": "MAIN",
+        "value": 200,
+        "flag": "c",
+        "description": "Threads created"
+    },
+    "MAIN.threads_destroyed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Threads destroyed"
+    },
+    "MAIN.threads_failed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Thread creation failed"
+    },
+    "MAIN.thread_queue_len": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "g",
+        "description": "Length of session queue"
+    },
+    "MAIN.busy_sleep": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Number of requests sent to sleep on busy objhdr"
+    },
+    "MAIN.busy_wakeup": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Number of requests woken after sleep on busy objhdr"
+    },
+    "MAIN.sess_queued": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Sessions queued for thread"
+    },
+    "MAIN.sess_dropped": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Sessions dropped for thread"
+    },
+    "MAIN.n_object": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "object structs made"
+    },
+    "MAIN.n_vampireobject": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "unresurrected objects"
+    },
+    "MAIN.n_objectcore": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "objectcore structs made"
+    },
+    "MAIN.n_objecthead": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "objecthead structs made"
+    },
+    "MAIN.n_waitinglist": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "waitinglist structs made"
+    },
+    "MAIN.n_backend": {
+        "type": "MAIN",
+        "value": 1,
+        "flag": "i",
+        "description": "Number of backends"
+    },
+    "MAIN.n_expired": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "Number of expired objects"
+    },
+    "MAIN.n_lru_nuked": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "Number of LRU nuked objects"
+    },
+    "MAIN.n_lru_moved": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "Number of LRU moved objects"
+    },
+    "MAIN.losthdr": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "HTTP header overflows"
+    },
+    "MAIN.s_sess": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Total sessions seen"
+    },
+    "MAIN.s_req": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Total requests seen"
+    },
+    "MAIN.s_pipe": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Total pipe sessions seen"
+    },
+    "MAIN.s_pass": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Total pass-ed requests seen"
+    },
+    "MAIN.s_fetch": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Total backend fetches initiated"
+    },
+    "MAIN.s_synth": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Total synthethic responses made"
+    },
+    "MAIN.s_req_hdrbytes": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Request header bytes"
+    },
+    "MAIN.s_req_bodybytes": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Request body bytes"
+    },
+    "MAIN.s_resp_hdrbytes": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Response header bytes"
+    },
+    "MAIN.s_resp_bodybytes": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Response body bytes"
+    },
+    "MAIN.s_pipe_hdrbytes": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Pipe request header bytes"
+    },
+    "MAIN.s_pipe_in": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Piped bytes from client"
+    },
+    "MAIN.s_pipe_out": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Piped bytes to client"
+    },
+    "MAIN.sess_closed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Session Closed"
+    },
+    "MAIN.sess_pipeline": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Session Pipeline"
+    },
+    "MAIN.sess_readahead": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Session Read Ahead"
+    },
+    "MAIN.sess_herd": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Session herd"
+    },
+    "MAIN.shm_records": {
+        "type": "MAIN",
+        "value": 6,
+        "flag": "a",
+        "description": "SHM records"
+    },
+    "MAIN.shm_writes": {
+        "type": "MAIN",
+        "value": 6,
+        "flag": "a",
+        "description": "SHM writes"
+    },
+    "MAIN.shm_flushes": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "SHM flushes due to overflow"
+    },
+    "MAIN.shm_cont": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "SHM MTX contention"
+    },
+    "MAIN.shm_cycles": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "SHM cycles through buffer"
+    },
+    "MAIN.sms_nreq": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "SMS allocator requests"
+    },
+    "MAIN.sms_nobj": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "SMS outstanding allocations"
+    },
+    "MAIN.sms_nbytes": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "SMS outstanding bytes"
+    },
+    "MAIN.sms_balloc": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "SMS bytes allocated"
+    },
+    "MAIN.sms_bfree": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "SMS bytes freed"
+    },
+    "MAIN.backend_req": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Backend requests made"
+    },
+    "MAIN.n_vcl": {
+        "type": "MAIN",
+        "value": 1,
+        "flag": "a",
+        "description": "Number of loaded VCLs in total"
+    },
+    "MAIN.n_vcl_avail": {
+        "type": "MAIN",
+        "value": 1,
+        "flag": "a",
+        "description": "Number of VCLs available"
+    },
+    "MAIN.n_vcl_discard": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Number of discarded VCLs"
+    },
+    "MAIN.bans": {
+        "type": "MAIN",
+        "value": 1,
+        "flag": "g",
+        "description": "Count of bans"
+    },
+    "MAIN.bans_completed": {
+        "type": "MAIN",
+        "value": 1,
+        "flag": "g",
+        "description": "Number of bans marked 'completed'"
+    },
+    "MAIN.bans_obj": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "g",
+        "description": "Number of bans using obj.*"
+    },
+    "MAIN.bans_req": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "g",
+        "description": "Number of bans using req.*"
+    },
+    "MAIN.bans_added": {
+        "type": "MAIN",
+        "value": 1,
+        "flag": "c",
+        "description": "Bans added"
+    },
+    "MAIN.bans_deleted": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Bans deleted"
+    },
+    "MAIN.bans_tested": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Bans tested against objects (lookup)"
+    },
+    "MAIN.bans_obj_killed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Objects killed by bans (lookup)"
+    },
+    "MAIN.bans_lurker_tested": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Bans tested against objects (lurker)"
+    },
+    "MAIN.bans_tests_tested": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Ban tests tested against objects (lookup)"
+    },
+    "MAIN.bans_lurker_tests_tested": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Ban tests tested against objects (lurker)"
+    },
+    "MAIN.bans_lurker_obj_killed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Objects killed by bans (lurker)"
+    },
+    "MAIN.bans_dups": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Bans superseded by other bans"
+    },
+    "MAIN.bans_lurker_contention": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Lurker gave way for lookup"
+    },
+    "MAIN.bans_persisted_bytes": {
+        "type": "MAIN",
+        "value": 13,
+        "flag": "g",
+        "description": "Bytes used by the persisted ban lists"
+    },
+    "MAIN.bans_persisted_fragmentation": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "g",
+        "description": "Extra bytes in persisted ban lists due to fragmentation"
+    },
+    "MAIN.n_purges": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "Number of purge operations executed"
+    },
+    "MAIN.n_obj_purged": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "Number of purged objects"
+    },
+    "MAIN.exp_mailed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Number of objects mailed to expiry thread"
+    },
+    "MAIN.exp_received": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Number of objects received by expiry thread"
+    },
+    "MAIN.hcb_nolock": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "HCB Lookups without lock"
+    },
+    "MAIN.hcb_lock": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "HCB Lookups with lock"
+    },
+    "MAIN.hcb_insert": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "HCB Inserts"
+    },
+    "MAIN.esi_errors": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "ESI parse errors (unlock)"
+    },
+    "MAIN.esi_warnings": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "ESI parse warnings (unlock)"
+    },
+    "MAIN.vmods": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "i",
+        "description": "Loaded VMODs"
+    },
+    "MAIN.n_gzip": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Gzip operations"
+    },
+    "MAIN.n_gunzip": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "a",
+        "description": "Gunzip operations"
+    },
+    "MAIN.vsm_free": {
+        "type": "MAIN",
+        "value": 974768,
+        "flag": "g",
+        "description": "Free VSM space"
+    },
+    "MAIN.vsm_used": {
+        "type": "MAIN",
+        "value": 83959840,
+        "flag": "g",
+        "description": "Used VSM space"
+    },
+    "MAIN.vsm_cooling": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "g",
+        "description": "Cooling VSM space"
+    },
+    "MAIN.vsm_overflow": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "g",
+        "description": "Overflow VSM space"
+    },
+    "MAIN.vsm_overflowed": {
+        "type": "MAIN",
+        "value": 0,
+        "flag": "c",
+        "description": "Overflowed VSM space"
+    },
+    "MGT.uptime": {
+        "type": "MGT",
+        "value": 0,
+        "flag": "c",
+        "description": "Management process uptime"
+    },
+    "MGT.child_start": {
+        "type": "MGT",
+        "value": 1,
+        "flag": "c",
+        "description": "Child process started"
+    },
+    "MGT.child_exit": {
+        "type": "MGT",
+        "value": 0,
+        "flag": "c",
+        "description": "Child process normal exit"
+    },
+    "MGT.child_stop": {
+        "type": "MGT",
+        "value": 0,
+        "flag": "c",
+        "description": "Child process unexpected exit"
+    },
+    "MGT.child_died": {
+        "type": "MGT",
+        "value": 0,
+        "flag": "c",
+        "description": "Child process died (signal)"
+    },
+    "MGT.child_dump": {
+        "type": "MGT",
+        "value": 0,
+        "flag": "c",
+        "description": "Child process core dumped"
+    },
+    "MGT.child_panic": {
+        "type": "MGT",
+        "value": 0,
+        "flag": "c",
+        "description": "Child process panic"
+    },
+    "MEMPOOL.vbc.live": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "g",
+        "description": "In use"
+    },
+    "MEMPOOL.vbc.pool": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 10,
+        "flag": "g",
+        "description": "In Pool"
+    },
+    "MEMPOOL.vbc.sz_wanted": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 88,
+        "flag": "g",
+        "description": "Size requested"
+    },
+    "MEMPOOL.vbc.sz_needed": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 120,
+        "flag": "g",
+        "description": "Size allocated"
+    },
+    "MEMPOOL.vbc.allocs": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "c",
+        "description": "Allocations"
+    },
+    "MEMPOOL.vbc.frees": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "c",
+        "description": "Frees"
+    },
+    "MEMPOOL.vbc.recycle": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "c",
+        "description": "Recycled from pool"
+    },
+    "MEMPOOL.vbc.timeout": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "c",
+        "description": "Timed out from pool"
+    },
+    "MEMPOOL.vbc.toosmall": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "c",
+        "description": "Too small to recycle"
+    },
+    "MEMPOOL.vbc.surplus": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "c",
+        "description": "Too many for pool"
+    },
+    "MEMPOOL.vbc.randry": {
+        "type": "MEMPOOL",
+        "ident": "vbc",
+        "value": 0,
+        "flag": "c",
+        "description": "Pool ran dry"
+    },
+    "MEMPOOL.busyobj.live": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "g",
+        "description": "In use"
+    },
+    "MEMPOOL.busyobj.pool": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 10,
+        "flag": "g",
+        "description": "In Pool"
+    },
+    "MEMPOOL.busyobj.sz_wanted": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 65536,
+        "flag": "g",
+        "description": "Size requested"
+    },
+    "MEMPOOL.busyobj.sz_needed": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 65568,
+        "flag": "g",
+        "description": "Size allocated"
+    },
+    "MEMPOOL.busyobj.allocs": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "c",
+        "description": "Allocations"
+    },
+    "MEMPOOL.busyobj.frees": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "c",
+        "description": "Frees"
+    },
+    "MEMPOOL.busyobj.recycle": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "c",
+        "description": "Recycled from pool"
+    },
+    "MEMPOOL.busyobj.timeout": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "c",
+        "description": "Timed out from pool"
+    },
+    "MEMPOOL.busyobj.toosmall": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "c",
+        "description": "Too small to recycle"
+    },
+    "MEMPOOL.busyobj.surplus": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "c",
+        "description": "Too many for pool"
+    },
+    "MEMPOOL.busyobj.randry": {
+        "type": "MEMPOOL",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "c",
+        "description": "Pool ran dry"
+    },
+    "MEMPOOL.req0.live": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "g",
+        "description": "In use"
+    },
+    "MEMPOOL.req0.pool": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 10,
+        "flag": "g",
+        "description": "In Pool"
+    },
+    "MEMPOOL.req0.sz_wanted": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 65536,
+        "flag": "g",
+        "description": "Size requested"
+    },
+    "MEMPOOL.req0.sz_needed": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 65568,
+        "flag": "g",
+        "description": "Size allocated"
+    },
+    "MEMPOOL.req0.allocs": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "c",
+        "description": "Allocations"
+    },
+    "MEMPOOL.req0.frees": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "c",
+        "description": "Frees"
+    },
+    "MEMPOOL.req0.recycle": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "c",
+        "description": "Recycled from pool"
+    },
+    "MEMPOOL.req0.timeout": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "c",
+        "description": "Timed out from pool"
+    },
+    "MEMPOOL.req0.toosmall": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "c",
+        "description": "Too small to recycle"
+    },
+    "MEMPOOL.req0.surplus": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "c",
+        "description": "Too many for pool"
+    },
+    "MEMPOOL.req0.randry": {
+        "type": "MEMPOOL",
+        "ident": "req0",
+        "value": 0,
+        "flag": "c",
+        "description": "Pool ran dry"
+    },
+    "MEMPOOL.sess0.live": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "g",
+        "description": "In use"
+    },
+    "MEMPOOL.sess0.pool": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 10,
+        "flag": "g",
+        "description": "In Pool"
+    },
+    "MEMPOOL.sess0.sz_wanted": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 384,
+        "flag": "g",
+        "description": "Size requested"
+    },
+    "MEMPOOL.sess0.sz_needed": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 416,
+        "flag": "g",
+        "description": "Size allocated"
+    },
+    "MEMPOOL.sess0.allocs": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "c",
+        "description": "Allocations"
+    },
+    "MEMPOOL.sess0.frees": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "c",
+        "description": "Frees"
+    },
+    "MEMPOOL.sess0.recycle": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "c",
+        "description": "Recycled from pool"
+    },
+    "MEMPOOL.sess0.timeout": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "c",
+        "description": "Timed out from pool"
+    },
+    "MEMPOOL.sess0.toosmall": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "c",
+        "description": "Too small to recycle"
+    },
+    "MEMPOOL.sess0.surplus": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "c",
+        "description": "Too many for pool"
+    },
+    "MEMPOOL.sess0.randry": {
+        "type": "MEMPOOL",
+        "ident": "sess0",
+        "value": 0,
+        "flag": "c",
+        "description": "Pool ran dry"
+    },
+    "MEMPOOL.req1.live": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "g",
+        "description": "In use"
+    },
+    "MEMPOOL.req1.pool": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 10,
+        "flag": "g",
+        "description": "In Pool"
+    },
+    "MEMPOOL.req1.sz_wanted": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 65536,
+        "flag": "g",
+        "description": "Size requested"
+    },
+    "MEMPOOL.req1.sz_needed": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 65568,
+        "flag": "g",
+        "description": "Size allocated"
+    },
+    "MEMPOOL.req1.allocs": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "c",
+        "description": "Allocations"
+    },
+    "MEMPOOL.req1.frees": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "c",
+        "description": "Frees"
+    },
+    "MEMPOOL.req1.recycle": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "c",
+        "description": "Recycled from pool"
+    },
+    "MEMPOOL.req1.timeout": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "c",
+        "description": "Timed out from pool"
+    },
+    "MEMPOOL.req1.toosmall": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "c",
+        "description": "Too small to recycle"
+    },
+    "MEMPOOL.req1.surplus": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "c",
+        "description": "Too many for pool"
+    },
+    "MEMPOOL.req1.randry": {
+        "type": "MEMPOOL",
+        "ident": "req1",
+        "value": 0,
+        "flag": "c",
+        "description": "Pool ran dry"
+    },
+    "MEMPOOL.sess1.live": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "g",
+        "description": "In use"
+    },
+    "MEMPOOL.sess1.pool": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 10,
+        "flag": "g",
+        "description": "In Pool"
+    },
+    "MEMPOOL.sess1.sz_wanted": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 384,
+        "flag": "g",
+        "description": "Size requested"
+    },
+    "MEMPOOL.sess1.sz_needed": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 416,
+        "flag": "g",
+        "description": "Size allocated"
+    },
+    "MEMPOOL.sess1.allocs": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "c",
+        "description": "Allocations"
+    },
+    "MEMPOOL.sess1.frees": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "c",
+        "description": "Frees"
+    },
+    "MEMPOOL.sess1.recycle": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "c",
+        "description": "Recycled from pool"
+    },
+    "MEMPOOL.sess1.timeout": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "c",
+        "description": "Timed out from pool"
+    },
+    "MEMPOOL.sess1.toosmall": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "c",
+        "description": "Too small to recycle"
+    },
+    "MEMPOOL.sess1.surplus": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "c",
+        "description": "Too many for pool"
+    },
+    "MEMPOOL.sess1.randry": {
+        "type": "MEMPOOL",
+        "ident": "sess1",
+        "value": 0,
+        "flag": "c",
+        "description": "Pool ran dry"
+    },
+    "SMA.s0.c_req": {
+        "type": "SMA",
+        "ident": "s0",
+        "value": 0,
+        "flag": "a",
+        "description": "Allocator requests"
+    },
+    "SMA.s0.c_fail": {
+        "type": "SMA",
+        "ident": "s0",
+        "value": 0,
+        "flag": "a",
+        "description": "Allocator failures"
+    },
+    "SMA.s0.c_bytes": {
+        "type": "SMA",
+        "ident": "s0",
+        "value": 0,
+        "flag": "a",
+        "description": "Bytes allocated"
+    },
+    "SMA.s0.c_freed": {
+        "type": "SMA",
+        "ident": "s0",
+        "value": 0,
+        "flag": "a",
+        "description": "Bytes freed"
+    },
+    "SMA.s0.g_alloc": {
+        "type": "SMA",
+        "ident": "s0",
+        "value": 0,
+        "flag": "i",
+        "description": "Allocations outstanding"
+    },
+    "SMA.s0.g_bytes": {
+        "type": "SMA",
+        "ident": "s0",
+        "value": 0,
+        "flag": "i",
+        "description": "Bytes outstanding"
+    },
+    "SMA.s0.g_space": {
+        "type": "SMA",
+        "ident": "s0",
+        "value": 268435456,
+        "flag": "i",
+        "description": "Bytes available"
+    },
+    "SMA.Transient.c_req": {
+        "type": "SMA",
+        "ident": "Transient",
+        "value": 0,
+        "flag": "a",
+        "description": "Allocator requests"
+    },
+    "SMA.Transient.c_fail": {
+        "type": "SMA",
+        "ident": "Transient",
+        "value": 0,
+        "flag": "a",
+        "description": "Allocator failures"
+    },
+    "SMA.Transient.c_bytes": {
+        "type": "SMA",
+        "ident": "Transient",
+        "value": 0,
+        "flag": "a",
+        "description": "Bytes allocated"
+    },
+    "SMA.Transient.c_freed": {
+        "type": "SMA",
+        "ident": "Transient",
+        "value": 0,
+        "flag": "a",
+        "description": "Bytes freed"
+    },
+    "SMA.Transient.g_alloc": {
+        "type": "SMA",
+        "ident": "Transient",
+        "value": 0,
+        "flag": "i",
+        "description": "Allocations outstanding"
+    },
+    "SMA.Transient.g_bytes": {
+        "type": "SMA",
+        "ident": "Transient",
+        "value": 0,
+        "flag": "i",
+        "description": "Bytes outstanding"
+    },
+    "SMA.Transient.g_space": {
+        "type": "SMA",
+        "ident": "Transient",
+        "value": 0,
+        "flag": "i",
+        "description": "Bytes available"
+    },
+    "VBE.default(127.0.0.1,,8080).vcls": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 1,
+        "flag": "i",
+        "description": "VCL references"
+    },
+    "VBE.default(127.0.0.1,,8080).happy": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "b",
+        "description": "Happy health probes"
+    },
+    "VBE.default(127.0.0.1,,8080).bereq_hdrbytes": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "a",
+        "description": "Request header bytes"
+    },
+    "VBE.default(127.0.0.1,,8080).bereq_bodybytes": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "a",
+        "description": "Request body bytes"
+    },
+    "VBE.default(127.0.0.1,,8080).beresp_hdrbytes": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "a",
+        "description": "Response header bytes"
+    },
+    "VBE.default(127.0.0.1,,8080).beresp_bodybytes": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "a",
+        "description": "Response body bytes"
+    },
+    "VBE.default(127.0.0.1,,8080).pipe_hdrbytes": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "a",
+        "description": "Pipe request header bytes"
+    },
+    "VBE.default(127.0.0.1,,8080).pipe_out": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "a",
+        "description": "Piped bytes to backend"
+    },
+    "VBE.default(127.0.0.1,,8080).pipe_in": {
+        "type": "VBE",
+        "ident": "default(127.0.0.1,,8080)",
+        "value": 0,
+        "flag": "a",
+        "description": "Piped bytes from backend"
+    },
+    "LCK.sms.creat": {
+        "type": "LCK",
+        "ident": "sms",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.sms.destroy": {
+        "type": "LCK",
+        "ident": "sms",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.sms.locks": {
+        "type": "LCK",
+        "ident": "sms",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.smp.creat": {
+        "type": "LCK",
+        "ident": "smp",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.smp.destroy": {
+        "type": "LCK",
+        "ident": "smp",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.smp.locks": {
+        "type": "LCK",
+        "ident": "smp",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.sma.creat": {
+        "type": "LCK",
+        "ident": "sma",
+        "value": 2,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.sma.destroy": {
+        "type": "LCK",
+        "ident": "sma",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.sma.locks": {
+        "type": "LCK",
+        "ident": "sma",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.smf.creat": {
+        "type": "LCK",
+        "ident": "smf",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.smf.destroy": {
+        "type": "LCK",
+        "ident": "smf",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.smf.locks": {
+        "type": "LCK",
+        "ident": "smf",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.hsl.creat": {
+        "type": "LCK",
+        "ident": "hsl",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.hsl.destroy": {
+        "type": "LCK",
+        "ident": "hsl",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.hsl.locks": {
+        "type": "LCK",
+        "ident": "hsl",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.hcb.creat": {
+        "type": "LCK",
+        "ident": "hcb",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.hcb.destroy": {
+        "type": "LCK",
+        "ident": "hcb",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.hcb.locks": {
+        "type": "LCK",
+        "ident": "hcb",
+        "value": 1,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.hcl.creat": {
+        "type": "LCK",
+        "ident": "hcl",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.hcl.destroy": {
+        "type": "LCK",
+        "ident": "hcl",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.hcl.locks": {
+        "type": "LCK",
+        "ident": "hcl",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.vcl.creat": {
+        "type": "LCK",
+        "ident": "vcl",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.vcl.destroy": {
+        "type": "LCK",
+        "ident": "vcl",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.vcl.locks": {
+        "type": "LCK",
+        "ident": "vcl",
+        "value": 2,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.sessmem.creat": {
+        "type": "LCK",
+        "ident": "sessmem",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.sessmem.destroy": {
+        "type": "LCK",
+        "ident": "sessmem",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.sessmem.locks": {
+        "type": "LCK",
+        "ident": "sessmem",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.sess.creat": {
+        "type": "LCK",
+        "ident": "sess",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.sess.destroy": {
+        "type": "LCK",
+        "ident": "sess",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.sess.locks": {
+        "type": "LCK",
+        "ident": "sess",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.wstat.creat": {
+        "type": "LCK",
+        "ident": "wstat",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.wstat.destroy": {
+        "type": "LCK",
+        "ident": "wstat",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.wstat.locks": {
+        "type": "LCK",
+        "ident": "wstat",
+        "value": 2,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.herder.creat": {
+        "type": "LCK",
+        "ident": "herder",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.herder.destroy": {
+        "type": "LCK",
+        "ident": "herder",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.herder.locks": {
+        "type": "LCK",
+        "ident": "herder",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.wq.creat": {
+        "type": "LCK",
+        "ident": "wq",
+        "value": 3,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.wq.destroy": {
+        "type": "LCK",
+        "ident": "wq",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.wq.locks": {
+        "type": "LCK",
+        "ident": "wq",
+        "value": 404,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.objhdr.creat": {
+        "type": "LCK",
+        "ident": "objhdr",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.objhdr.destroy": {
+        "type": "LCK",
+        "ident": "objhdr",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.objhdr.locks": {
+        "type": "LCK",
+        "ident": "objhdr",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.exp.creat": {
+        "type": "LCK",
+        "ident": "exp",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.exp.destroy": {
+        "type": "LCK",
+        "ident": "exp",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.exp.locks": {
+        "type": "LCK",
+        "ident": "exp",
+        "value": 2,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.lru.creat": {
+        "type": "LCK",
+        "ident": "lru",
+        "value": 2,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.lru.destroy": {
+        "type": "LCK",
+        "ident": "lru",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.lru.locks": {
+        "type": "LCK",
+        "ident": "lru",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.cli.creat": {
+        "type": "LCK",
+        "ident": "cli",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.cli.destroy": {
+        "type": "LCK",
+        "ident": "cli",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.cli.locks": {
+        "type": "LCK",
+        "ident": "cli",
+        "value": 14,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.ban.creat": {
+        "type": "LCK",
+        "ident": "ban",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.ban.destroy": {
+        "type": "LCK",
+        "ident": "ban",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.ban.locks": {
+        "type": "LCK",
+        "ident": "ban",
+        "value": 7,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.vbp.creat": {
+        "type": "LCK",
+        "ident": "vbp",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.vbp.destroy": {
+        "type": "LCK",
+        "ident": "vbp",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.vbp.locks": {
+        "type": "LCK",
+        "ident": "vbp",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.backend.creat": {
+        "type": "LCK",
+        "ident": "backend",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.backend.destroy": {
+        "type": "LCK",
+        "ident": "backend",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.backend.locks": {
+        "type": "LCK",
+        "ident": "backend",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.vcapace.creat": {
+        "type": "LCK",
+        "ident": "vcapace",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.vcapace.destroy": {
+        "type": "LCK",
+        "ident": "vcapace",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.vcapace.locks": {
+        "type": "LCK",
+        "ident": "vcapace",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.nbusyobj.creat": {
+        "type": "LCK",
+        "ident": "nbusyobj",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.nbusyobj.destroy": {
+        "type": "LCK",
+        "ident": "nbusyobj",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.nbusyobj.locks": {
+        "type": "LCK",
+        "ident": "nbusyobj",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.busyobj.creat": {
+        "type": "LCK",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.busyobj.destroy": {
+        "type": "LCK",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.busyobj.locks": {
+        "type": "LCK",
+        "ident": "busyobj",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.mempool.creat": {
+        "type": "LCK",
+        "ident": "mempool",
+        "value": 6,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.mempool.destroy": {
+        "type": "LCK",
+        "ident": "mempool",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.mempool.locks": {
+        "type": "LCK",
+        "ident": "mempool",
+        "value": 60,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.vxid.creat": {
+        "type": "LCK",
+        "ident": "vxid",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.vxid.destroy": {
+        "type": "LCK",
+        "ident": "vxid",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.vxid.locks": {
+        "type": "LCK",
+        "ident": "vxid",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    },
+    "LCK.pipestat.creat": {
+        "type": "LCK",
+        "ident": "pipestat",
+        "value": 1,
+        "flag": "a",
+        "description": "Created locks"
+    },
+    "LCK.pipestat.destroy": {
+        "type": "LCK",
+        "ident": "pipestat",
+        "value": 0,
+        "flag": "a",
+        "description": "Destroyed locks"
+    },
+    "LCK.pipestat.locks": {
+        "type": "LCK",
+        "ident": "pipestat",
+        "value": 0,
+        "flag": "a",
+        "description": "Lock Operations"
+    }
+}

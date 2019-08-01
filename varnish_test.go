@@ -145,6 +145,7 @@ func Test_VarnishMetrics(t *testing.T) {
 		t.Skipf("Cannot find test/scrape files from workind dir %s", dir)
 	}
 	for _, test := range []string{
+		filepath.Join(dir, "test/scrape", "4.0.5.json"),
 		filepath.Join(dir, "test/scrape", "4.1.1.json"),
 		filepath.Join(dir, "test/scrape", "5.2.0.json"),
 		filepath.Join(dir, "test/scrape", "6.0.0.json"),

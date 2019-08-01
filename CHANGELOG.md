@@ -1,3 +1,8 @@
+1.5.1
+=====
+* Fix incorrectly typing Varnish 4.0.x stat flag `a` metrics as gauges instead of counters. ([#48](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/48) @glennslaven)
+* Fix `-test` mode to wait for full metrics scrape before continuing.
+
 1.5
 ===
 * Deprecate `-no-exit`. Default behavior is now not to exit on scrape errors as it should be for a long running HTTP server.

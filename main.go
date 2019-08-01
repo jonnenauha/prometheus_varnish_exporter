@@ -145,6 +145,7 @@ func main() {
 
 	// Test to verify everything is ok before starting the server
 	{
+		done := make(chan bool)
 		metrics := make(chan prometheus.Metric)
 		go func() {
 			for m := range metrics {
@@ -152,10 +153,13 @@ func main() {
 					logInfo("%s", m.Desc())
 				}
 			}
+			done <- true
 		}()
 		tStart := time.Now()
 		buf, err := ScrapeVarnish(metrics)
 		close(metrics)
+		<-done
+
 		if err == nil {
 			logInfo("Test scrape done in %s", time.Now().Sub(tStart))
 			logRaw("")

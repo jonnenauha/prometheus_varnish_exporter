@@ -158,15 +158,18 @@ func Test_VarnishMetrics(t *testing.T) {
 		if err != nil {
 			t.Fatal(err.Error())
 		}
+		done := make(chan bool)
 		metrics := make(chan prometheus.Metric)
 		descs := []*prometheus.Desc{}
 		go func() {
 			for m := range metrics {
 				descs = append(descs, m.Desc())
 			}
+			done <- true
 		}()
 		_, err = ScrapeVarnishFrom(buf, metrics)
 		close(metrics)
+		<-done
 
 		if err != nil {
 			t.Fatal(err.Error())
@@ -193,14 +196,17 @@ func Test_VarnishMetrics_CI(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	done := make(chan bool)
 	metrics := make(chan prometheus.Metric)
 	go func() {
 		for m := range metrics {
 			t.Logf("%s", m.Desc())
 		}
+		done <- true
 	}()
 	if _, err := ScrapeVarnish(metrics); err != nil {
 		t.Fatal(err)
 	}
 	close(metrics)
+	<-done
 }

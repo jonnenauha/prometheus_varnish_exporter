@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var testFileVersions = []string{"4.0.5", "4.1.1", "5.2.0", "6.0.0"}
+var testFileVersions = []string{"3.0.5", "4.0.5", "4.1.1", "5.2.0", "6.0.0"}
 
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{

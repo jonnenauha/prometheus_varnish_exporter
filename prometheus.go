@@ -126,6 +126,9 @@ var (
 		group{name: "sma", prefixes: []string{
 			"sma.",
 		}},
+		group{name: "smf", prefixes: []string{
+			"smf.",
+		}},
 		group{name: "mgt", prefixes: []string{
 			"mgt.",
 		}},
@@ -188,6 +191,16 @@ var (
 		"varnish_sma_g_alloc":     "type",
 		"varnish_sma_g_bytes":     "type",
 		"varnish_sma_g_space":     "type",
+		"varnish_smf_c_bytes":     "type",
+		"varnish_smf_c_fail":      "type",
+		"varnish_smf_c_freed":     "type",
+		"varnish_smf_c_req":       "type",
+		"varnish_smf_g_alloc":     "type",
+		"varnish_smf_g_bytes":     "type",
+		"varnish_smf_g_smf_frag":  "type",
+		"varnish_smf_g_smf_large": "type",
+		"varnish_smf_g_smf":       "type",
+		"varnish_smf_g_space":     "type",
 	}
 )
 

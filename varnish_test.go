@@ -89,14 +89,18 @@ func matchStringSlices(s1, s2 []string) bool {
 }
 
 func Test_VarnishBackendNames(t *testing.T) {
-	for _, backend := range []string{
-		"eu1_x.y-z:w(192.52.0.192,,8085)", // 4.0.3
-		"root:eu2_x.y-z:w",                // 4.1
-		"def0e7f7-a676-4eed-9d8b-78ef7ce21e93.us1_x.y-z:w",
-		"root:29813cbb-7329-4eb8-8969-26be2ef58c88.us2_x.y-z:w", // ??
-		"boot.default",
-		"ce19737f-72b5-4f4b-9d39-3d8c2d28240b.default",
+	for _, variant := range [][]string{
+		{"eu1_x.y-z:w(192.52.0.192,,8085)", "eu1_x.y-z:w", "192.52.0.192,,8085"}, // 4.0.3
+		{"root:eu2_x.y-z:w", "eu2_x.y-z:w", "unknown"},                // 4.1
+		{"def0e7f7-a676-4eed-9d8b-78ef7ce21e93.us1_x.y-z:w", "us1_x.y-z:w", "def0e7f7-a676-4eed-9d8b-78ef7ce21e93"},
+		{"root:29813cbb-7329-4eb8-8969-26be2ef58c88.us2_x.y-z:w", "us2_x.y-z:w", "29813cbb-7329-4eb8-8969-26be2ef58c88"}, // ??
+		{"boot.default", "default", "unknown"},
+		{"ce19737f-72b5-4f4b-9d39-3d8c2d28240b.default", "default", "ce19737f-72b5-4f4b-9d39-3d8c2d28240b"},
 	} {
+		backend := variant[0]
+		expected_backend := variant[1]
+		expected_server := variant[2]
+
 		vName, data := dummyBackendValue(backend)
 		var (
 			vGroup       = prometheusGroup(vName)
@@ -120,10 +124,19 @@ func Test_VarnishBackendNames(t *testing.T) {
 		}
 		// Varnish < 5.2
 		name_1, _, labelKeys_1, labelValues_1 := computePrometheusInfo(vName, vGroup, vIdentifier, vDescription)
+		computed_backend := findLabelValue("backend", labelKeys_1, labelValues_1)
+		computed_server := findLabelValue("server", labelKeys_1, labelValues_1)
 		t.Logf("%s > %s > %s\n", vName, backend, name_1)
 		t.Logf("  ident   : %s\n", vIdentifier)
-		t.Logf("  backend : %s\n", findLabelValue("backend", labelKeys_1, labelValues_1))
-		t.Logf("  server  : %s\n", findLabelValue("server", labelKeys_1, labelValues_1))
+		t.Logf("  backend : %s\n", computed_backend)
+		t.Logf("  server  : %s\n", computed_server)
+
+		if expected_backend != computed_backend {
+			t.Fatalf("backend %q != %q", computed_backend, expected_backend)
+		}
+		if expected_server != expected_server {
+			t.Fatalf("server %q != %q", computed_server, expected_server)
+		}
 
 		// Varnish >= 5.2 no longer has 'ident', test that detected correctly from vName
 		name_2, _, labelKeys_2, labelValues_2 := computePrometheusInfo(vName, vGroup, "", vDescription)

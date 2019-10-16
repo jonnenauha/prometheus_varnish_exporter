@@ -95,6 +95,8 @@ func Test_VarnishBackendNames(t *testing.T) {
 		{"def0e7f7-a676-4eed-9d8b-78ef7ce21e93.us1_x.y-z:w", "us1_x.y-z:w", "def0e7f7-a676-4eed-9d8b-78ef7ce21e93"},
 		{"root:29813cbb-7329-4eb8-8969-26be2ef58c88.us2_x.y-z:w", "us2_x.y-z:w", "29813cbb-7329-4eb8-8969-26be2ef58c88"}, // ??
 		{"boot.default", "default", "unknown"},
+		{"reload_2019-08-29T100458.default", "default", "unknown"}, // varnish_reload_vcl in 4
+		{"reload_20191016_072034_54500.default", "default", "unknown"}, // varnishreload in 6+
 		{"ce19737f-72b5-4f4b-9d39-3d8c2d28240b.default", "default", "ce19737f-72b5-4f4b-9d39-3d8c2d28240b"},
 	} {
 		backend := variant[0]

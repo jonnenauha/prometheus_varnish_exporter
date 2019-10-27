@@ -223,6 +223,16 @@ func cleanBackendName(name string) string {
 			name = name[len(prefix):]
 		}
 	}
+
+	// reload_2019-08-29T100458.<name> as by varnish_reload_vcl in 4.x
+	// reload_20191014_091124_78599.<name> as by varnishreload in 6+
+	if strings.HasPrefix(name, "reload_") {
+		dot := strings.Index(name, ".")
+		if dot != -1 {
+			name = name[dot + 1:]
+		}
+	}
+
 	return name
 }
 

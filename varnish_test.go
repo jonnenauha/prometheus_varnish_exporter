@@ -6,11 +6,12 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
+
+var testFileVersions = []string{"3.0.5", "4.0.5", "4.1.1", "5.2.0", "6.0.0"}
 
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{
@@ -144,13 +145,8 @@ func Test_VarnishMetrics(t *testing.T) {
 	if !fileExists(filepath.Join(dir, "test/scrape")) {
 		t.Skipf("Cannot find test/scrape files from workind dir %s", dir)
 	}
-	for _, test := range []string{
-		filepath.Join(dir, "test/scrape", "4.0.5.json"),
-		filepath.Join(dir, "test/scrape", "4.1.1.json"),
-		filepath.Join(dir, "test/scrape", "5.2.0.json"),
-		filepath.Join(dir, "test/scrape", "6.0.0.json"),
-	} {
-		version := strings.Replace(filepath.Base(test), ".json", "", -1)
+	for _, version := range testFileVersions {
+		test := filepath.Join(dir, "test/scrape", version+".json")
 		VarnishVersion.parseVersion(version)
 		t.Logf("test scrape %s", VarnishVersion)
 
@@ -175,6 +171,62 @@ func Test_VarnishMetrics(t *testing.T) {
 			t.Fatal(err.Error())
 		}
 		t.Logf("  %d metrics", len(descs))
+	}
+}
+
+type testCollector struct {
+	filepath string
+	t        *testing.T
+}
+
+func (tc *testCollector) Describe(ch chan<- *prometheus.Desc) {
+}
+
+func (tc *testCollector) Collect(ch chan<- prometheus.Metric) {
+	buf, err := ioutil.ReadFile(tc.filepath)
+	if err != nil {
+		tc.t.Fatal(err.Error())
+	}
+	_, err = ScrapeVarnishFrom(buf, ch)
+
+	if err != nil {
+		tc.t.Fatal(err.Error())
+	}
+}
+
+func Test_PrometheusExport(t *testing.T) {
+	dir, _ := os.Getwd()
+	if !fileExists(filepath.Join(dir, "test/scrape")) {
+		t.Skipf("Cannot find test/scrape files from workind dir %s", dir)
+	}
+	for _, version := range testFileVersions {
+		test := filepath.Join(dir, "test/scrape", version+".json")
+		VarnishVersion.parseVersion(version)
+		t.Logf("test scrape %s", VarnishVersion)
+
+		registry := prometheus.NewRegistry()
+		collector := &testCollector{filepath: test}
+		registry.MustRegister(collector)
+
+		gathering, err := registry.Gather()
+		if err != nil {
+			errors, ok := err.(prometheus.MultiError)
+			if ok {
+				for _, e := range errors {
+					t.Errorf("  Error in prometheus Gather: %#v", e)
+				}
+			} else {
+				t.Errorf("  Error in prometheus Gather: %#v", err)
+			}
+		}
+
+		metricCount := 0
+
+		for _, mf := range gathering {
+			metricCount += len(mf.Metric)
+		}
+
+		t.Logf("  %d metrics", metricCount)
 	}
 }
 

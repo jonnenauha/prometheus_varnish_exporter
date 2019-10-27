@@ -165,13 +165,6 @@ var (
 			total:     "main_n_wrk",
 			desc:      "Number of worker threads",
 		},
-		&grouping{
-			newPrefix: "main_bans",
-			prefix:    "main_n_ban",
-			total:     "main_n_ban",
-			desc:      "Number of bans",
-			labelKey:  "action",
-		},
 	}
 	fqNames = map[string]string{
 		"varnish_lck_colls":   "varnish_lock_collisions",

@@ -1,3 +1,7 @@
+master
+=====
+* Start building releases with go 1.13.3
+
 1.5.2
 =====
 * Fix metric names and missing labels for file cache metrics ([#55](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/55) @thedustin)

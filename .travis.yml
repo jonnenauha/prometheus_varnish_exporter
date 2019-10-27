@@ -3,10 +3,7 @@ sudo: required
 language: go
 
 go:
-  - 1.12.6
-
-env:
-  - GO111MODULE=on
+  - 1.13.3
 
 before_script:
   - sudo apt-get install varnish -y

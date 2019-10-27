@@ -71,7 +71,7 @@ func (p *varnishstatParams) make() (params []string) {
 	return params
 }
 
-func init() {
+func main() {
 	// prometheus conventions
 	flag.StringVar(&StartParams.ListenAddress, "web.listen-address", StartParams.ListenAddress, "Address on which to expose metrics and web interface.")
 	flag.StringVar(&StartParams.Path, "web.telemetry-path", StartParams.Path, "Path under which to expose metrics.")
@@ -123,9 +123,7 @@ func init() {
 
 	// Test run or user explicitly wants to exit on any scrape errors during runtime.
 	ExitHandler.exitOnError = StartParams.Test == true || StartParams.ExitOnErrors == true
-}
 
-func main() {
 	if b, err := json.MarshalIndent(StartParams, "", "  "); err == nil {
 		logInfo("%s %s %s", ApplicationName, getVersion(false), b)
 	} else {

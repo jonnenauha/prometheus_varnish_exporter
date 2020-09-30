@@ -68,14 +68,18 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 	}
 
 	countersJSON := make(map[string]interface{})
-	if metricsJSON["version"] == 1 {
-		countersJSON = metricsJSON["counters"]
+	if version, ok := metricsJSON["version"]; ok {
+		if version.(json.Number) == "1" {
+			countersJSON = metricsJSON["counters"].(map[string]interface{})
+		} else {
+			return nil, fmt.Errorf("unknown stats json version: %#v", version)
+		}
 	} else {
 		countersJSON = metricsJSON
 	}
 
 	for vName, raw := range countersJSON {
-		if vName == "version" || vName == "timestamp" {
+		if vName == "timestamp" {
 			continue
 		}
 		if dt := reflect.TypeOf(raw); dt.Kind() != reflect.Map {

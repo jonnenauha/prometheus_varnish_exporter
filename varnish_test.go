@@ -11,10 +11,13 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var testFileVersions = []string{"3.0.5", "4.0.5", "4.1.1", "5.2.0", "6.0.0"}
+var testFileVersions = []string{"3.0.5", "4.0.5", "4.1.1", "5.2.0", "6.0.0", "6.5.1"}
 
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{
+		"varnishstat (varnish-6.5.1 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 6, Minor: 5, Patch: 1, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
 		"varnishstat (varnish-6.0.0 revision a068361dff0d25a0d85cf82a6e5fdaf315e06a7d)": &varnishVersion{
 			Major: 6, Minor: 0, Patch: 0, Revision: "a068361dff0d25a0d85cf82a6e5fdaf315e06a7d",
 		},
@@ -92,11 +95,11 @@ func matchStringSlices(s1, s2 []string) bool {
 func Test_VarnishBackendNames(t *testing.T) {
 	for _, variant := range [][]string{
 		{"eu1_x.y-z:w(192.52.0.192,,8085)", "eu1_x.y-z:w", "192.52.0.192,,8085"}, // 4.0.3
-		{"root:eu2_x.y-z:w", "eu2_x.y-z:w", "unknown"},                // 4.1
+		{"root:eu2_x.y-z:w", "eu2_x.y-z:w", "unknown"},                           // 4.1
 		{"def0e7f7-a676-4eed-9d8b-78ef7ce21e93.us1_x.y-z:w", "us1_x.y-z:w", "def0e7f7-a676-4eed-9d8b-78ef7ce21e93"},
 		{"root:29813cbb-7329-4eb8-8969-26be2ef58c88.us2_x.y-z:w", "us2_x.y-z:w", "29813cbb-7329-4eb8-8969-26be2ef58c88"}, // ??
 		{"boot.default", "default", "unknown"},
-		{"reload_2019-08-29T100458.default", "default", "unknown"}, // varnish_reload_vcl in 4
+		{"reload_2019-08-29T100458.default", "default", "unknown"},     // varnish_reload_vcl in 4
 		{"reload_20191016_072034_54500.default", "default", "unknown"}, // varnishreload in 6+
 		{"ce19737f-72b5-4f4b-9d39-3d8c2d28240b.default", "default", "ce19737f-72b5-4f4b-9d39-3d8c2d28240b"},
 	} {
@@ -220,7 +223,7 @@ func Test_PrometheusExport(t *testing.T) {
 		t.Logf("test scrape %s", VarnishVersion)
 
 		registry := prometheus.NewRegistry()
-		collector := &testCollector{filepath: test}
+		collector := &testCollector{filepath: test, t: t}
 		registry.MustRegister(collector)
 
 		gathering, err := registry.Gather()
@@ -237,8 +240,18 @@ func Test_PrometheusExport(t *testing.T) {
 
 		metricCount := 0
 
+		includesVarnishBackendHappy := false
 		for _, mf := range gathering {
+			if *mf.Name == "varnish_backend_happy" {
+				includesVarnishBackendHappy = true
+			}
+
 			metricCount += len(mf.Metric)
+		}
+
+		// Validate presence of a single metric, which is present across all versions
+		if !includesVarnishBackendHappy {
+			t.Error(" Missing metric varnish_backend_happy")
 		}
 
 		t.Logf("  %d metrics", metricCount)

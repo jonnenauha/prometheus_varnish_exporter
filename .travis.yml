@@ -1,5 +1,3 @@
-# @todo port releases to v2 https://docs.travis-ci.com/user/deployment-v2/providers/releases/
-
 os: linux
 dist: focal
 
@@ -20,9 +18,10 @@ after_success:
   - if [ -n "$TRAVIS_TAG" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./build.sh $TRAVIS_TAG; fi
 
 deploy:
+  edge: true # opt in to dpl v2
   provider: releases
-  api_key:
-    secure: eDySTfAst2/hz39o1Lt2OnbNtep/eyeFPIT9WdpK8ajVuXAdP2MAwwotmH30iGjCijLW0k7vzZI7yczHqUSEB0E9qHXhF2LDLeirlSMHVWPl4sRDq1+gn0nHBkgH5jO5vAE3pj+zd/N+4rKutCtOBhsfdZKxDuxJXR8On0wwnCVFVQoIsC7gqM2TGmtFpfSFwVefNHdYyWgh0YMg9JtzUp2mSQr8e0+L4fO5jafhpbFXlTzhxqoPwyI2UhnXRLTjCQWWCjxN+37ij13Y6H9NxEaHJr+t9ejpNbKFfUZmhF/9n2seesoeYC9HEkEWTTjuERc1CQlgtxG+sMk1b0ejZio0QUQbVB1U+aTtac2m3U5k4oEAUhYs4rHKy+QmVSRp3Qmo+PV7CuSv9CKivxhvbMUPpos1eF6CuHR3ZKjn/11VimnhpXJcyl44oM4UfoLsZuOcieWta9fLBd0EO+SIvmaBLljAKRMjrnCpkT9E0dKWgUqyDQzqv5l2WZ7lFT+bWuDJ7WeIwnG59jVOjSwvniFWQwQyJ0BmjjGB4g3ZYSQb8oBj+6RzxoBPpoEewBsypXZoDB0yL7GEqxnHmoVLe7D6R/lG+TeTVMOZLkAw13UNAw1v1VHwe0kjM5zqEMekZaLbmvHVC5hUEUob4xsiQu/qHGelT9+Gq9ICwB8GbWg=
+  token:
+    secure: "sY70uGYD3R5urUhwG97ncA6GFtVG9qBcJ+Ge+dlO1c36vi8XafuqhvY7isNfrXvbAmNSr70JZLzU2UsQ3A5XMWXh4LvvOSPjOgusDWnxS/XYjscIyb4KaL2q+Mt8+VrobaC30gPzKS8srmQ0ToJ3LCMvVtu9ZRLBJ3K+pbMRF2grxwqUGZp4xnOSxxr2bSYhzYHe0I0wfUdfQ+9cqsfoIAcTf6JcJn7UP2LdOdNiqBdKoCgMRUoLS7UARO/mTupY+fJRv/UdiqS9zDr2E3/mA9CnLSaj+nzKsYMNDrOMFynHCq19PuVi8TvJcEDAgqYFiLt5NybrHuAXQmwH1ndPD4GS5RgSm8N46rD0a8rH/SzvyjDGOfar803KjjeV6DxIZwFIfrM+tkQQT8GwiCB1rsxsZ1Q6JqEv6AhjgDi5mZOoKtIysyz2DHNV0r7os2MRujQumz8cwGeMVUnWOJJer3yEcjiL7wXC8WK113w1DdvKlrlW7X+Z0cnEtHjIgxr8LTnmJbjqSWknj1x+jZoRi5K9Z/OXfHl9w7JvLv5+TYsNA0KSgZssFDYG8mVqxbk4piiOl1i1pMgRc62hsh/mim302FRdVXJjUePuvNIwbPT1NCvZ8ZhwamwwIgzaL7VqxCuKygaOpqWY4Nd83fVFKMz55SkWP6tH0GCgzMkqEGY="
   file:
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.linux-amd64.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.linux-386.tar.gz"
@@ -38,7 +37,6 @@ deploy:
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.windows-386.tar.gz"
     - "bin/release/dashboards-$TRAVIS_TAG.tar.gz"
     - "bin/release/sha256sums.txt"
-  skip_cleanup: true
   on:
     repo: jonnenauha/prometheus_varnish_exporter
     tags: true

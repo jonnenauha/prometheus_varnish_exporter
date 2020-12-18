@@ -1,6 +1,7 @@
-master
-=====
-* Start building releases with go 1.13.3
+1.6
+===
+* Varnish 6.5.x support ([#64](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/64) @johanneswuerbach)
+* Start building releases with go 1.15.6
 
 1.5.2
 =====

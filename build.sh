@@ -26,7 +26,7 @@ fi
 tar -cvzf ./bin/release/dashboards-$VERSION.tar.gz dashboards/* > /dev/null 2>&1
 
 for goos in linux darwin windows freebsd openbsd netbsd ; do
-    for goarch in amd64 386; do
+    for goarch in amd64; do
         # path
         file_versioned="prometheus_varnish_exporter-$VERSION.$goos-$goarch"
         outdir="bin/build/$file_versioned"

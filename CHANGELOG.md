@@ -2,6 +2,7 @@
 
 - Varnish 6.5.x support ([#64](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/64) @johanneswuerbach)
 - Update github.com/prometheus/client_golang dependency to v1.9.0
+- Remove GOARCH=386 builds from releases
 - Start building releases with go 1.15.6
 
 # 1.5.2

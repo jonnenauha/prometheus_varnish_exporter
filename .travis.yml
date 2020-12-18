@@ -40,3 +40,4 @@ deploy:
   on:
     repo: jonnenauha/prometheus_varnish_exporter
     tags: true
+  overwrite: true

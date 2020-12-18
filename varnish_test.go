@@ -251,7 +251,7 @@ func Test_PrometheusExport(t *testing.T) {
 
 		// Validate presence of a single metric, which is present across all versions
 		if !includesVarnishBackendHappy {
-			t.Error(" Missing metric varnish_backend_happy")
+			t.Error("Missing metric varnish_backend_happy")
 		}
 
 		t.Logf("  %d metrics", metricCount)

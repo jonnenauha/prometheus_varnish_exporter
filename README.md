@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jonnenauha/prometheus_varnish_exporter.svg?branch=master)](https://travis-ci.org/jonnenauha/prometheus_varnish_exporter)
+[![Build Status](https://travis-ci.com/jonnenauha/prometheus_varnish_exporter.svg?branch=master)](https://travis-ci.com/github/jonnenauha/prometheus_varnish_exporter)
 
 # Varnish exporter for Prometheus
 

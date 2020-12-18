@@ -68,11 +68,21 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 	}
 
 	countersJSON := make(map[string]interface{})
-	if version, ok := metricsJSON["version"]; ok {
-		if version.(json.Number) == "1" {
+	// From Varnish 6.5 https://varnish-cache.org/docs/6.5/whats-new/upgrading-6.5.html#varnishstat
+	if metricsJSON["version"] != nil {
+		version_raw, ok := metricsJSON["version"].(json.Number)
+		if !ok {
+			return nil, fmt.Errorf("Unhandled json stats version type: %T %#v", metricsJSON["version"], metricsJSON["version"])
+		}
+		version, err := version_raw.Int64()
+		if err != nil {
+			return nil, fmt.Errorf("Unhandled json stats version type: %s", err)
+		}
+		switch version {
+		case 1:
 			countersJSON = metricsJSON["counters"].(map[string]interface{})
-		} else {
-			return nil, fmt.Errorf("unknown stats json version: %#v", version)
+		default:
+			return nil, fmt.Errorf("Unimplemented json stats version %d", version)
 		}
 	} else {
 		countersJSON = metricsJSON

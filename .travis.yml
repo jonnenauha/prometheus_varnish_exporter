@@ -1,4 +1,7 @@
-sudo: required
+# @todo port releases to v2 https://docs.travis-ci.com/user/deployment-v2/providers/releases/
+
+os: linux
+dist: focal
 
 language: go
 

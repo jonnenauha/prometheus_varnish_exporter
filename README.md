@@ -64,6 +64,7 @@ You need go 1.11 or higher, otherwise you can keep using `GOPATH` based developm
 1. [Install latest go](https://golang.org/doc/install) or use OS repos `golang` package.
 
 **Development**
+
 ```bash
 # clone
 git clone git@github.com:jonnenauha/prometheus_varnish_exporter.git

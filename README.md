@@ -24,6 +24,14 @@ To test that `varnishstat` is found on the host machine and to preview all expor
 
     prometheus_varnish_exporter -test
 
+# Troubleshooting
+
+> Could not get hold of varnishd, is it running?
+>
+> 2020/12/18 20:22:33 [FATAL] Startup test: varnishstat scrape failed: exit status 1
+
+User you are executing as can't find or access varnish services. `sudo` is a hammer that works, see for proper solutions [#62](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/62).
+
 # Docker
 
 Scraping metrics from Varnish running in a docker container is possible since 1.4.1. Resolve your Varnish container name with `docker ps` and run the following. This will use `docker exec <container-name>` to execute varnishstat inside the spesified container.

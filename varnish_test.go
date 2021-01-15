@@ -235,7 +235,7 @@ func Test_IsOutdatedVbe(t *testing.T) {
 	type testConfig struct {
 		vName                     string
 		mostRecentVbeReloadPrefix string
-		expecteedIsOutdatedVbe    bool
+		expectedIsOutdatedVbe     bool
 	}
 
 	for _, testConfig := range []testConfig{
@@ -248,11 +248,11 @@ func Test_IsOutdatedVbe(t *testing.T) {
 	} {
 		computedIsOutdatedVbe := isOutdatedVbe(testConfig.vName, testConfig.mostRecentVbeReloadPrefix)
 		t.Logf("'%s', '%s'\n", testConfig.vName, testConfig.mostRecentVbeReloadPrefix)
-		t.Logf("  expected outdated : %t\n", testConfig.expecteedIsOutdatedVbe)
+		t.Logf("  expected outdated : %t\n", testConfig.expectedIsOutdatedVbe)
 		t.Logf("  computed outdated : %t\n", computedIsOutdatedVbe)
 
-		if computedIsOutdatedVbe != testConfig.expecteedIsOutdatedVbe {
-			t.Fatalf("outdatedVbe %t != %t", computedIsOutdatedVbe, testConfig.expecteedIsOutdatedVbe)
+		if computedIsOutdatedVbe != testConfig.expectedIsOutdatedVbe {
+			t.Fatalf("outdatedVbe %t != %t", computedIsOutdatedVbe, testConfig.expectedIsOutdatedVbe)
 		}
 	}
 }

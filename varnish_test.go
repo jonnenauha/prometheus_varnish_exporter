@@ -192,6 +192,71 @@ func Test_VarnishMetrics(t *testing.T) {
 	}
 }
 
+func Test_FindMostRecentVbeReloadPrefix(t *testing.T) {
+	type testConfig struct {
+		varnishCounters                   map[string]interface{}
+		expectedMostRecentVbeReloadPrefix string
+	}
+
+	for _, testConfig := range []testConfig{
+		// Varnish <= 4.0 has no duplicated stats on reload
+		{map[string]interface{}{
+			"VBE.default(127.0.0.1,,8080).happy": "any",
+		}, ""},
+		// Varnish 4.1 or later, not yet reloaded
+		{map[string]interface{}{
+			"VBE.boot.default.happy": "any",
+		}, ""},
+		// Varnish 4.1, reloaded 2 times
+		{map[string]interface{}{
+			"VBE.boot.default.happy":                     "any",
+			"VBE.reload_2019-08-29T100458.default.happy": "any",
+			"VBE.reload_2019-08-29T100459.default.happy": "any",
+		}, "VBE.reload_2019-08-29T100459"},
+		// Varnish 6+, reloaded 2 times
+		{map[string]interface{}{
+			"VBE.boot.default.happy":                         "any",
+			"VBE.reload_20191016_072034_54500.default.happy": "any",
+			"VBE.reload_20191016_072034_54501.default.happy": "any",
+		}, "VBE.reload_20191016_072034_54501"},
+	} {
+		computedMostRecentVbeReloadPrefix := findMostRecentVbeReloadPrefix(testConfig.varnishCounters)
+		t.Logf("Varnish counters: %s\n", testConfig.varnishCounters)
+		t.Logf("  expected most recent prefix : '%s'\n", testConfig.expectedMostRecentVbeReloadPrefix)
+		t.Logf("  computed most recent prefix : '%s'\n", computedMostRecentVbeReloadPrefix)
+
+		if computedMostRecentVbeReloadPrefix != testConfig.expectedMostRecentVbeReloadPrefix {
+			t.Fatalf("mostRecentVbeReloadPrefix %q != %q", computedMostRecentVbeReloadPrefix, testConfig.expectedMostRecentVbeReloadPrefix)
+		}
+	}
+}
+
+func Test_IsOutdatedVbe(t *testing.T) {
+	type testConfig struct {
+		vName                     string
+		mostRecentVbeReloadPrefix string
+		expectedIsOutdatedVbe     bool
+	}
+
+	for _, testConfig := range []testConfig{
+		{"MGT.uptime", "", false},                                                                    // not VBE
+		{"MGT.uptime", "VBE.reload_20191016_072034_54500", false},                                    // not VBE
+		{"VBE.boot.default.conn", "", false},                                                         // VCL not yet reloaded
+		{"VBE.boot.default.conn", "VBE.reload_20191016_072034_54500", true},                          // VCL reloaded, 'boot' is now outdated
+		{"VBE.reload_20191016_072034_54500.default.conn", "VBE.reload_20191016_072034_54500", false}, // current VCL version
+		{"VBE.reload_20191016_072034_54499.default.conn", "VBE.reload_20191016_072034_54500", true},  // previous VCL version
+	} {
+		computedIsOutdatedVbe := isOutdatedVbe(testConfig.vName, testConfig.mostRecentVbeReloadPrefix)
+		t.Logf("'%s', '%s'\n", testConfig.vName, testConfig.mostRecentVbeReloadPrefix)
+		t.Logf("  expected outdated : %t\n", testConfig.expectedIsOutdatedVbe)
+		t.Logf("  computed outdated : %t\n", computedIsOutdatedVbe)
+
+		if computedIsOutdatedVbe != testConfig.expectedIsOutdatedVbe {
+			t.Fatalf("outdatedVbe %t != %t", computedIsOutdatedVbe, testConfig.expectedIsOutdatedVbe)
+		}
+	}
+}
+
 type testCollector struct {
 	filepath string
 	t        *testing.T

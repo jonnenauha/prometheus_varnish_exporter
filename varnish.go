@@ -15,6 +15,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+const (
+	vbeReload       = "VBE.reload_"
+	vbeReloadLength = len(vbeReload)
+)
+
 var (
 	DescCache = &descCache{
 		descs: make(map[string]*prometheus.Desc),
@@ -88,7 +93,13 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 		countersJSON = metricsJSON
 	}
 
+	mostRecentVbeReloadPrefix := findMostRecentVbeReloadPrefix(countersJSON)
+
 	for vName, raw := range countersJSON {
+
+		if isOutdatedVbe(vName, mostRecentVbeReloadPrefix) {
+			continue
+		}
 		if vName == "timestamp" {
 			continue
 		}
@@ -210,6 +221,31 @@ func executeVarnishstat(varnishstatExe string, params ...string) (*bytes.Buffer,
 	cmd.Stdout = buf
 	cmd.Stderr = buf
 	return buf, cmd.Run()
+}
+
+// Returns the most recent prefix for 'VBE.reload_' stats. Empty until first reload.
+// 'VBE.reload_2019-08-29T100458' as by varnish_reload_vcl in 4.1+
+// 'VBE.reload_20191014_091124_78599' as by varnishreload in 6+
+func findMostRecentVbeReloadPrefix(countersJSON map[string]interface{}) string {
+	var mostRecentVbeReloadPrefix string
+	for vName, _ := range countersJSON {
+		// Checking only the required ".happy" stat
+		if strings.HasPrefix(vName, vbeReload) && strings.HasSuffix(vName, ".happy") {
+			dotAfterPrefixIndex := vbeReloadLength + strings.Index(vName[vbeReloadLength:], ".")
+			vbeReloadPrefix := vName[:dotAfterPrefixIndex]
+			if strings.Compare(vbeReloadPrefix, mostRecentVbeReloadPrefix) > 0 {
+				mostRecentVbeReloadPrefix = vbeReloadPrefix
+			}
+		}
+	}
+	return mostRecentVbeReloadPrefix
+}
+
+// Returns true if the given 'VBE.' statistic refers to an outdated VCL version
+func isOutdatedVbe(vName string, mostRecentVbeReloadPrefix string) bool {
+	return len(mostRecentVbeReloadPrefix) > 0 &&
+		strings.HasPrefix(vName, "VBE.") &&
+		!strings.HasPrefix(vName, mostRecentVbeReloadPrefix)
 }
 
 // varnishVersion

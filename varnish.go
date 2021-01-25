@@ -16,8 +16,7 @@ import (
 )
 
 const (
-	vbeReload       = "VBE.reload_"
-	vbeReloadLength = len(vbeReload)
+	vbeReload = "VBE.reload_"
 )
 
 var (
@@ -231,7 +230,7 @@ func findMostRecentVbeReloadPrefix(countersJSON map[string]interface{}) string {
 	for vName, _ := range countersJSON {
 		// Checking only the required ".happy" stat
 		if strings.HasPrefix(vName, vbeReload) && strings.HasSuffix(vName, ".happy") {
-			dotAfterPrefixIndex := vbeReloadLength + strings.Index(vName[vbeReloadLength:], ".")
+			dotAfterPrefixIndex := len(vbeReload) + strings.Index(vName[len(vbeReload):], ".")
 			vbeReloadPrefix := vName[:dotAfterPrefixIndex]
 			if strings.Compare(vbeReloadPrefix, mostRecentVbeReloadPrefix) > 0 {
 				mostRecentVbeReloadPrefix = vbeReloadPrefix

@@ -113,7 +113,7 @@
           "tableColumn": "Value",
           "targets": [
             {
-              "expr": "avg(( rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) / rate(varnish_main_client_req{instance=~\"^($varnish_instance).*\"}[5m]) ))",
+              "expr": "avg((rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) / (rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) + rate(varnish_main_cache_miss{instance=~\"^($varnish_instance).*\"}[5m]))))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1046,7 +1046,7 @@
           "steppedLine": true,
           "targets": [
             {
-              "expr": "avg(rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) / rate(varnish_main_client_req{instance=~\"^($varnish_instance).*\"}[5m]))",
+              "expr": "rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) / (rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) + rate(varnish_main_cache_miss{instance=~\"^($varnish_instance).*\"}[5m]))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1056,7 +1056,7 @@
               "step": 240
             },
             {
-              "expr": "avg(1 - (rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) / rate(varnish_main_client_req{instance=~\"^($varnish_instance).*\"}[5m])))",
+              "expr": "rate(varnish_main_cache_miss{instance=~\"^($varnish_instance).*\"}[5m]) / (rate(varnish_main_cache_hit{instance=~\"^($varnish_instance).*\"}[5m]) + rate(varnish_main_cache_miss{instance=~\"^($varnish_instance).*\"}[5m]))",
               "format": "time_series",
               "hide": false,
               "interval": "",

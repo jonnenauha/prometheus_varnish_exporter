@@ -1,3 +1,9 @@
+# 1.6.1
+
+- Fix duplicate counter errors on VLC reloads ([#70](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/70) @LorenzoPeri)
+- Match cache hit rate calculation in example dashboard to match Varnish internals ([#73](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/73)] @dhpowrhost)
+- Start building releases with go 1.17.4
+
 # 1.6
 
 - Varnish 6.5.x support ([#64](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/64) @johanneswuerbach)

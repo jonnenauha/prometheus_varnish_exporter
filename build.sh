@@ -54,7 +54,7 @@ rm .goenv
 
 echo -e "\nRelease done: $(./bin/build/prometheus_varnish_exporter-$VERSION.$GOOS-$GOARCH/prometheus_varnish_exporter --version)"
 for goos in linux darwin windows freebsd openbsd netbsd ; do
-    for goarch in amd64 386; do
+    for goarch in amd64; do
         file_versioned="prometheus_varnish_exporter-$VERSION.$goos-$goarch"
         path=bin/release/$file_versioned.tar.gz
         echo "  > `du -hc $path | awk 'NR==1{print $1;}'`    $path"

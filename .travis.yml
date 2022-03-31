@@ -24,11 +24,17 @@ deploy:
     secure: "sY70uGYD3R5urUhwG97ncA6GFtVG9qBcJ+Ge+dlO1c36vi8XafuqhvY7isNfrXvbAmNSr70JZLzU2UsQ3A5XMWXh4LvvOSPjOgusDWnxS/XYjscIyb4KaL2q+Mt8+VrobaC30gPzKS8srmQ0ToJ3LCMvVtu9ZRLBJ3K+pbMRF2grxwqUGZp4xnOSxxr2bSYhzYHe0I0wfUdfQ+9cqsfoIAcTf6JcJn7UP2LdOdNiqBdKoCgMRUoLS7UARO/mTupY+fJRv/UdiqS9zDr2E3/mA9CnLSaj+nzKsYMNDrOMFynHCq19PuVi8TvJcEDAgqYFiLt5NybrHuAXQmwH1ndPD4GS5RgSm8N46rD0a8rH/SzvyjDGOfar803KjjeV6DxIZwFIfrM+tkQQT8GwiCB1rsxsZ1Q6JqEv6AhjgDi5mZOoKtIysyz2DHNV0r7os2MRujQumz8cwGeMVUnWOJJer3yEcjiL7wXC8WK113w1DdvKlrlW7X+Z0cnEtHjIgxr8LTnmJbjqSWknj1x+jZoRi5K9Z/OXfHl9w7JvLv5+TYsNA0KSgZssFDYG8mVqxbk4piiOl1i1pMgRc62hsh/mim302FRdVXJjUePuvNIwbPT1NCvZ8ZhwamwwIgzaL7VqxCuKygaOpqWY4Nd83fVFKMz55SkWP6tH0GCgzMkqEGY="
   file:
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.linux-amd64.tar.gz"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.linux-arm64.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.freebsd-amd64.tar.gz"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.freebsd-arm64.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.openbsd-amd64.tar.gz"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.openbsd-arm64.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.netbsd-amd64.tar.gz"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.netbsd-arm64.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.darwin-amd64.tar.gz"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.darwin-arm64.tar.gz"
     - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.windows-amd64.tar.gz"
+    - "bin/release/prometheus_varnish_exporter-$TRAVIS_TAG.windows-arm64.tar.gz"
     - "bin/release/dashboards-$TRAVIS_TAG.tar.gz"
     - "bin/release/sha256sums.txt"
   on:

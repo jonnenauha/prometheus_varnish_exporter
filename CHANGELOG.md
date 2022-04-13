@@ -14,7 +14,7 @@
 # 1.5.2
 
 - Fix metric names and missing labels for file cache metrics ([#55](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/55) @thedustin)
-- Fix scraping for Varnish 3.x. Removes the `main_n_ban` grouping. Metrics will now have individual `bans_<type>` metrics instad of the grouped metric that had `type` as a label. ([#51](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/51) @glennslaven)
+- Fix scraping for Varnish 3.x. Removes the `main_n_ban` grouping. Metrics will now have individual `bans_<type>` metrics instead of the grouped metric that had `type` as a label. ([#51](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/51) @glennslaven)
   - If you previously updated to 1.5 your exports would have already been broken as the grouping tries to combine gauge and counter metrics, which is not allowed by Prometheus.
   - This is breaking change if you are using Varnish 3.x and use ban metrics in your dashboards, you'll need to update them to the new ones.
 - Clean exported backend name if beginning with reload\_ ([#56](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/56) @stromnet)
@@ -36,7 +36,7 @@
 
 # 1.4.1
 
-- `-docker-container-name` to signal that `varnishstat` should be ran in a docker container with `docker exec <container-name>` .
+- `-docker-container-name` to signal that `varnishstat` should be run in a docker container with `docker exec <container-name>` .
 - Support Varnish 6.0.0 by testing the main logic works and metrics are exported.
 - Start building releases with go 1.10.3
 

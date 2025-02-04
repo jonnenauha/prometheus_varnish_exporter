@@ -65,9 +65,7 @@ To aggregate all loaded VCLs into per-backend metric the following Prometheus [r
 
 **One time setup**
 
-This repot support go modules so out of `GOPATH` builds are supported. This makes development and buildings easier for go "novices".
-
-You need go 1.11 or higher, otherwise you can keep using `GOPATH` based development ([see old README](https://github.com/jonnenauha/prometheus_varnish_exporter/blob/1.4.1/README.md#build)).
+This repository uses go modules. This makes development and buildings easier for go "novices". You need go 1.22 or higher.
 
 1. [Install latest go](https://golang.org/doc/install) or use OS repos `golang` package.
 

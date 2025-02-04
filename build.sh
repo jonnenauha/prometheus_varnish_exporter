@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/env bash
 
 set -e
 
-if [ ! -e main.go ] ; then
+if [ ! -e main.go ]; then
     echo "Error: Script can only be ran on the root of the source tree"
     exit 1
 fi
@@ -23,44 +23,47 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-tar -cvzf ./bin/release/dashboards-$VERSION.tar.gz dashboards/* > /dev/null 2>&1
+tar -cvzf "./bin/release/dashboards-${VERSION}.tar.gz" dashboards/* >/dev/null  2>&1
 
-for goos in linux darwin windows freebsd openbsd netbsd ; do
+for goos in linux darwin windows freebsd openbsd netbsd; do
+    # shellcheck disable=SC2043
     for goarch in amd64; do
         # path
         file_versioned="prometheus_varnish_exporter-$VERSION.$goos-$goarch"
         outdir="bin/build/$file_versioned"
         path="$outdir/prometheus_varnish_exporter"
-        if [ $goos = windows ] ; then
+        if [ $goos = windows ]; then
             path=$path.exe
         fi
 
-        mkdir -p $outdir
-        cp LICENSE CHANGELOG.md README.md $outdir/
+        mkdir -p "$outdir"
+        cp LICENSE CHANGELOG.md README.md "$outdir/"
 
         # build
         echo -e "\nBuilding $goos/$goarch"
-        GOOS=$goos GOARCH=$goarch go build -o $path -ldflags "-X 'main.Version=$VERSION' -X 'main.VersionHash=$VERSION_HASH' -X 'main.VersionDate=$VERSION_DATE'"
-        echo "  > `du -hc $path | awk 'NR==1{print $1;}'`    `file $path`"
+        GOOS=$goos GOARCH=$goarch go build -o "$path" -ldflags "-X 'main.Version=$VERSION' -X 'main.VersionHash=$VERSION_HASH' -X 'main.VersionDate=$VERSION_DATE'"
+        echo "  > $(du -hc "$path" | awk 'NR==1{print $1;}')    $(file "$path")"
 
         # compress (for unique filenames to github release files)
-        tar -C ./bin/build -cvzf ./bin/release/$file_versioned.tar.gz $file_versioned > /dev/null 2>&1
+        tar -C ./bin/build -cvzf "./bin/release/${file_versioned}.tar.gz" "$file_versioned" >/dev/null  2>&1
     done
 done
 
-go env > .goenv
+go env >.goenv
 source .goenv
 rm .goenv
 
-echo -e "\nRelease done: $(./bin/build/prometheus_varnish_exporter-$VERSION.$GOOS-$GOARCH/prometheus_varnish_exporter --version)"
-for goos in linux darwin windows freebsd openbsd netbsd ; do
+# shellcheck disable=SC2153
+echo -e "\nRelease done: $("./bin/build/prometheus_varnish_exporter-${VERSION}.${GOOS}-${GOARCH}/prometheus_varnish_exporter" --version)"
+for goos in linux darwin windows freebsd openbsd netbsd; do
+    # shellcheck disable=SC2043
     for goarch in amd64; do
         file_versioned="prometheus_varnish_exporter-$VERSION.$goos-$goarch"
         path=bin/release/$file_versioned.tar.gz
-        echo "  > `du -hc $path | awk 'NR==1{print $1;}'`    $path"
+        echo "  > $(du -hc "$path" | awk 'NR==1{print $1;}')    $path"
     done
 done
 
 cd ./bin/release
-shasum --algorithm 256 --binary ./* | sed -En "s/\*\.\/(.*)$/\1/p" > sha256sums.txt
+shasum --algorithm 256 --binary ./* | sed -En "s/\*\.\/(.*)$/\1/p" >sha256sums.txt
 cd ../..

@@ -15,31 +15,31 @@ var testFileVersions = []string{"3.0.5", "4.0.5", "4.1.1", "5.2.0", "6.0.0", "6.
 
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{
-		"varnishstat (varnish-6.5.1 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+		"varnishstat (varnish-6.5.1 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": {
 			Major: 6, Minor: 5, Patch: 1, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
 		},
-		"varnishstat (varnish-6.0.0 revision a068361dff0d25a0d85cf82a6e5fdaf315e06a7d)": &varnishVersion{
+		"varnishstat (varnish-6.0.0 revision a068361dff0d25a0d85cf82a6e5fdaf315e06a7d)": {
 			Major: 6, Minor: 0, Patch: 0, Revision: "a068361dff0d25a0d85cf82a6e5fdaf315e06a7d",
 		},
-		"varnishstat (varnish-5.2.0 revision 4c4875cbf)": &varnishVersion{
+		"varnishstat (varnish-5.2.0 revision 4c4875cbf)": {
 			Major: 5, Minor: 2, Patch: 0, Revision: "4c4875cbf",
 		},
-		"varnishstat (varnish-4.1.10 revision 1d090c5a08f41c36562644bafcce9d3cb85d824f)": &varnishVersion{
+		"varnishstat (varnish-4.1.10 revision 1d090c5a08f41c36562644bafcce9d3cb85d824f)": {
 			Major: 4, Minor: 1, Patch: 10, Revision: "1d090c5a08f41c36562644bafcce9d3cb85d824f",
 		},
-		"varnishstat (varnish-4.1.0 revision 3041728)": &varnishVersion{
+		"varnishstat (varnish-4.1.0 revision 3041728)": {
 			Major: 4, Minor: 1, Patch: 0, Revision: "3041728",
 		},
-		"varnishstat (varnish-4 revision)": &varnishVersion{
+		"varnishstat (varnish-4 revision)": {
 			Major: 4, Minor: -1, Patch: -1,
 		},
-		"varnishstat (varnish-3.0.5 revision 1a89b1f)": &varnishVersion{
+		"varnishstat (varnish-3.0.5 revision 1a89b1f)": {
 			Major: 3, Minor: 0, Patch: 5, Revision: "1a89b1f",
 		},
-		"varnish 2.0": &varnishVersion{
+		"varnish 2.0": {
 			Major: 2, Minor: 0, Patch: -1,
 		},
-		"varnish 1": &varnishVersion{
+		"varnish 1": {
 			Major: 1, Minor: -1, Patch: -1,
 		},
 	}
@@ -114,7 +114,7 @@ func Test_VarnishBackendNames(t *testing.T) {
 			vIdentifier  string
 			vErr         error
 		)
-		if value, ok := data["description"]; ok && vErr == nil {
+		if value, ok := data["description"]; ok {
 			if vDescription, ok = value.(string); !ok {
 				vErr = fmt.Errorf("%s description it not a string", vName)
 			}
@@ -266,7 +266,7 @@ func (tc *testCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (tc *testCollector) Collect(ch chan<- prometheus.Metric) {
-	buf, err := ioutil.ReadFile(tc.filepath)
+	buf, err := os.ReadFile(tc.filepath)
 	if err != nil {
 		tc.t.Fatal(err.Error())
 	}

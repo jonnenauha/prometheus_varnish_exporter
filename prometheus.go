@@ -114,25 +114,25 @@ type group struct {
 
 var (
 	groups = []group{
-		group{name: "backend", prefixes: []string{
+		{name: "backend", prefixes: []string{
 			"vbe.",
 		}},
-		group{name: "mempool", prefixes: []string{
+		{name: "mempool", prefixes: []string{
 			"mempool.",
 		}},
-		group{name: "lck", prefixes: []string{
+		{name: "lck", prefixes: []string{
 			"lck.",
 		}},
-		group{name: "sma", prefixes: []string{
+		{name: "sma", prefixes: []string{
 			"sma.",
 		}},
-		group{name: "smf", prefixes: []string{
+		{name: "smf", prefixes: []string{
 			"smf.",
 		}},
-		group{name: "mgt", prefixes: []string{
+		{name: "mgt", prefixes: []string{
 			"mgt.",
 		}},
-		group{name: "main", prefixes: []string{
+		{name: "main", prefixes: []string{
 			"main.",
 		}},
 	}
@@ -148,18 +148,18 @@ type grouping struct {
 
 var (
 	fqGroupPrefixes = []*grouping{
-		&grouping{
+		{
 			prefix: "main_fetch",
 			total:  "main_s_fetch",
 			desc:   "Number of fetches",
 		},
-		&grouping{
+		{
 			newPrefix: "main_sessions",
 			prefix:    "main_sess",
 			total:     "main_s_sess",
 			desc:      "Number of sessions",
 		},
-		&grouping{
+		{
 			newPrefix: "main_worker_threads",
 			prefix:    "main_n_wrk",
 			total:     "main_n_wrk",
@@ -229,7 +229,7 @@ func cleanBackendName(name string) string {
 	if strings.HasPrefix(name, "reload_") {
 		dot := strings.Index(name, ".")
 		if dot != -1 {
-			name = name[dot + 1:]
+			name = name[dot+1:]
 		}
 	}
 

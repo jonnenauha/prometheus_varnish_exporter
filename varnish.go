@@ -125,7 +125,7 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 		)
 		flag, _ := stringProperty(data, "flag")
 
-		if value, ok := data["description"]; ok && vErr == nil {
+		if value, ok := data["description"]; ok {
 			if vDescription, ok = value.(string); !ok {
 				vErr = fmt.Errorf("%s description it not a string", vName)
 			}
@@ -227,7 +227,7 @@ func executeVarnishstat(varnishstatExe string, params ...string) (*bytes.Buffer,
 // 'VBE.reload_20191014_091124_78599' as by varnishreload in 6+
 func findMostRecentVbeReloadPrefix(countersJSON map[string]interface{}) string {
 	var mostRecentVbeReloadPrefix string
-	for vName, _ := range countersJSON {
+	for vName := range countersJSON {
 		// Checking only the required ".happy" stat
 		if strings.HasPrefix(vName, vbeReload) && strings.HasSuffix(vName, ".happy") {
 			dotAfterPrefixIndex := len(vbeReload) + strings.Index(vName[len(vbeReload):], ".")

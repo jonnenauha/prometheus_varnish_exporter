@@ -4,7 +4,7 @@ dist: focal
 language: go
 
 go:
-  - 1.17.4
+  - 1.23.5
 
 before_script:
   - sudo apt-get install varnish -y

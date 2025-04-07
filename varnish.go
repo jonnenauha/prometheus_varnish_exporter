@@ -99,6 +99,9 @@ func ScrapeVarnishFrom(buf []byte, ch chan<- prometheus.Metric) ([]byte, error) 
 		if isOutdatedVbe(vName, mostRecentVbeReloadPrefix) {
 			continue
 		}
+		if ExcludeVBE && strings.HasPrefix(vName, "VBE.") {
+			continue
+		}
 		if vName == "timestamp" {
 			continue
 		}

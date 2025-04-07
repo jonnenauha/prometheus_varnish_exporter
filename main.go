@@ -20,6 +20,7 @@ var (
 	VersionHash     string
 	VersionDate     string
 
+	ExcludeVBE bool
 	PrometheusExporter = NewPrometheusExporter()
 	VarnishVersion     = NewVarnishVersion()
 	ExitHandler        = &exitHandler{}
@@ -93,11 +94,14 @@ func main() {
 	flag.BoolVar(&StartParams.Test, "test", StartParams.Test, "Test varnishstat availability, prints available metrics and exits.")
 	flag.BoolVar(&StartParams.Raw, "raw", StartParams.Test, "Raw stdout logging without timestamps.")
 	flag.BoolVar(&StartParams.WithGoMetrics, "with-go-metrics", StartParams.WithGoMetrics, "Export go runtime and http handler metrics")
+	excludeVbe := flag.Bool("e", false, "Exclude metrics starting with VBE.")
 
 	// deprecated
 	flag.BoolVar(&StartParams.noExit, "no-exit", StartParams.noExit, "Deprecated: see -exit-on-errors")
 
 	flag.Parse()
+
+	ExcludeVBE = *excludeVbe
 
 	if version {
 		fmt.Printf("%s %s\n", ApplicationName, getVersion(true))

@@ -1,27 +1,27 @@
 # 1.6.1
 
-- Fix duplicate counter errors on VLC reloads ([#70](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/70) @LorenzoPeri)
-- Match cache hit rate calculation in example dashboard to match Varnish internals ([#73](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/73)] @dhpowrhost)
+- Fix duplicate counter errors on VLC reloads ([#70](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/70) @LorenzoPeri)
+- Match cache hit rate calculation in example dashboard to match Varnish internals ([#73](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/73)] @dhpowrhost)
 - Start building releases with go 1.17.4
 
 # 1.6
 
-- Varnish 6.5.x support ([#64](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/64) @johanneswuerbach)
+- Varnish 6.5.x support ([#64](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/64) @johanneswuerbach)
 - Update github.com/prometheus/client_golang dependency to v1.9.0
 - Remove GOARCH=386 builds from releases
 - Start building releases with go 1.15.6
 
 # 1.5.2
 
-- Fix metric names and missing labels for file cache metrics ([#55](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/55) @thedustin)
-- Fix scraping for Varnish 3.x. Removes the `main_n_ban` grouping. Metrics will now have individual `bans_<type>` metrics instad of the grouped metric that had `type` as a label. ([#51](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/51) @glennslaven)
+- Fix metric names and missing labels for file cache metrics ([#55](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/55) @thedustin)
+- Fix scraping for Varnish 3.x. Removes the `main_n_ban` grouping. Metrics will now have individual `bans_<type>` metrics instad of the grouped metric that had `type` as a label. ([#51](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/51) @glennslaven)
   - If you previously updated to 1.5 your exports would have already been broken as the grouping tries to combine gauge and counter metrics, which is not allowed by Prometheus.
   - This is breaking change if you are using Varnish 3.x and use ban metrics in your dashboards, you'll need to update them to the new ones.
-- Clean exported backend name if beginning with reload\_ ([#56](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/56) @stromnet)
+- Clean exported backend name if beginning with reload\_ ([#56](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/56) @stromnet)
 
 # 1.5.1
 
-- Fix incorrectly typing Varnish 4.0.x stat flag `a` metrics as gauges instead of counters. ([#48](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/48) @glennslaven)
+- Fix incorrectly typing Varnish 4.0.x stat flag `a` metrics as gauges instead of counters. ([#48](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/48) @glennslaven)
 - Fix `-test` mode to wait for full metrics scrape before continuing.
 
 # 1.5
@@ -65,7 +65,7 @@
 
 # 1.3.1
 
-- Don't return a 400 for `/` to behave more like other Prometheus exporters out there. Can now be used for health checks. ([#15](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/15))
+- Don't return a 400 for `/` to behave more like other Prometheus exporters out there. Can now be used for health checks. ([#15](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/15))
 - Start building releases with go 1.8
 
 # 1.3
@@ -77,14 +77,14 @@
 
 # 1.2
 
-- Fix VBE label inconsistencies by always having `backend` and `server` labels present. ([#5](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/5) [#8](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/8))
+- Fix VBE label inconsistencies by always having `backend` and `server` labels present. ([#5](https://github.com/lyildirimtr/prometheus_varnish_exporter/issues/5) [#8](https://github.com/lyildirimtr/prometheus_varnish_exporter/issues/8))
 - Resulted in varnish reporting lots of errors for a while after VCL reloads.
-- Fix bugs in `backend` and `server` label value parsing from VBE ident. ([#5](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/5) [#8](https://github.com/jonnenauha/prometheus_varnish_exporter/issues/8))
+- Fix bugs in `backend` and `server` label value parsing from VBE ident. ([#5](https://github.com/lyildirimtr/prometheus_varnish_exporter/issues/5) [#8](https://github.com/lyildirimtr/prometheus_varnish_exporter/issues/8))
 - Add travis-ci build and test integration. Also auto pushes cross compiled binaries to github releases on tags.
 
 # 1.1
 
-- `-web.health-path <path>` can be configured to return a 200 OK response, by default not enabled. [#6](https://github.com/jonnenauha/prometheus_varnish_exporter/pull/6)
+- `-web.health-path <path>` can be configured to return a 200 OK response, by default not enabled. [#6](https://github.com/lyildirimtr/prometheus_varnish_exporter/pull/6)
 - Start building releases with go 1.7.3
 
 # 1.0

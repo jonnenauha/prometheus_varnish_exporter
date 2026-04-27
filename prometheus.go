@@ -129,6 +129,16 @@ var (
 		group{name: "smf", prefixes: []string{
 			"smf.",
 		}},
+		// Varnish 8+ new groups
+		group{name: "smu", prefixes: []string{
+			"smu.",
+		}},
+		group{name: "vcp", prefixes: []string{
+			"vcp.",
+		}},
+		group{name: "waiter", prefixes: []string{
+			"waiter.",
+		}},
 		group{name: "mgt", prefixes: []string{
 			"mgt.",
 		}},
@@ -167,33 +177,52 @@ var (
 		},
 	}
 	fqNames = map[string]string{
-		"varnish_lck_colls":   "varnish_lock_collisions",
-		"varnish_lck_creat":   "varnish_lock_created",
-		"varnish_lck_destroy": "varnish_lock_destroyed",
-		"varnish_lck_locks":   "varnish_lock_operations",
+		"varnish_lck_colls":        "varnish_lock_collisions",
+		"varnish_lck_creat":        "varnish_lock_created",
+		"varnish_lck_destroy":      "varnish_lock_destroyed",
+		"varnish_lck_locks":        "varnish_lock_operations",
+		// Varnish 8+ new LCK counters
+		"varnish_lck_dbg_busy":     "varnish_lock_dbg_busy",
+		"varnish_lck_dbg_try_fail": "varnish_lock_dbg_try_fail",
 	}
 	fqIdentifiers = map[string]string{
-		"varnish_lock_collisions": "target",
-		"varnish_lock_created":    "target",
-		"varnish_lock_destroyed":  "target",
-		"varnish_lock_operations": "target",
-		"varnish_sma_c_bytes":     "type",
-		"varnish_sma_c_fail":      "type",
-		"varnish_sma_c_freed":     "type",
-		"varnish_sma_c_req":       "type",
-		"varnish_sma_g_alloc":     "type",
-		"varnish_sma_g_bytes":     "type",
-		"varnish_sma_g_space":     "type",
-		"varnish_smf_c_bytes":     "type",
-		"varnish_smf_c_fail":      "type",
-		"varnish_smf_c_freed":     "type",
-		"varnish_smf_c_req":       "type",
-		"varnish_smf_g_alloc":     "type",
-		"varnish_smf_g_bytes":     "type",
-		"varnish_smf_g_smf_frag":  "type",
-		"varnish_smf_g_smf_large": "type",
-		"varnish_smf_g_smf":       "type",
-		"varnish_smf_g_space":     "type",
+		"varnish_lock_collisions":  "target",
+		"varnish_lock_created":     "target",
+		"varnish_lock_destroyed":   "target",
+		"varnish_lock_operations":  "target",
+		// Varnish 8+ new LCK counters
+		"varnish_lock_dbg_busy":     "target",
+		"varnish_lock_dbg_try_fail": "target",
+		"varnish_sma_c_bytes":      "type",
+		"varnish_sma_c_fail":       "type",
+		"varnish_sma_c_freed":      "type",
+		"varnish_sma_c_req":        "type",
+		"varnish_sma_g_alloc":      "type",
+		"varnish_sma_g_bytes":      "type",
+		"varnish_sma_g_space":      "type",
+		"varnish_smf_c_bytes":      "type",
+		"varnish_smf_c_fail":       "type",
+		"varnish_smf_c_freed":      "type",
+		"varnish_smf_c_req":        "type",
+		"varnish_smf_g_alloc":      "type",
+		"varnish_smf_g_bytes":      "type",
+		"varnish_smf_g_smf_frag":   "type",
+		"varnish_smf_g_smf_large":  "type",
+		"varnish_smf_g_smf":        "type",
+		"varnish_smf_g_space":      "type",
+		// Varnish 8+ SMU (Umem Stevedore) counters
+		"varnish_smu_c_bytes":      "type",
+		"varnish_smu_c_fail":       "type",
+		"varnish_smu_c_freed":      "type",
+		"varnish_smu_c_req":        "type",
+		"varnish_smu_g_alloc":      "type",
+		"varnish_smu_g_bytes":      "type",
+		"varnish_smu_g_space":      "type",
+		// Varnish 8+ WAITER counters
+		"varnish_waiter_conns":     "id",
+		"varnish_waiter_remclose":  "id",
+		"varnish_waiter_timeout":   "id",
+		"varnish_waiter_action":    "id",
 	}
 )
 

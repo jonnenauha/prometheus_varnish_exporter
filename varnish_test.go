@@ -11,10 +11,49 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-var testFileVersions = []string{"3.0.5", "4.0.5", "4.1.1", "5.2.0", "6.0.0", "6.5.1"}
+var testFileVersions = []string{"3.0.5", "4.0.5", "4.1.1", "5.2.0", "6.0.0", "6.5.1", "7.0.0", "7.1.0", "7.2.0", "7.3.0", "7.4.0", "7.5.0", "8.0.0", "9.0.0", "9.1.0", "9.2.0", "9.3.0", "9.4.0", "9.5.0"}
 
 func Test_VarnishVersion(t *testing.T) {
 	tests := map[string]*varnishVersion{
+		"varnishstat (varnish-9.5.0 revision c56a2bb036b5dbab230722cc87bb5f375c3db89d)": &varnishVersion{
+			Major: 9, Minor: 5, Patch: 0, Revision: "c56a2bb036b5dbab230722cc87bb5f375c3db89d",
+		},
+		"varnishstat (varnish-9.4.0 revision a166160ca51d8d21a97d2644266cbfd0df00e1cf)": &varnishVersion{
+			Major: 9, Minor: 4, Patch: 0, Revision: "a166160ca51d8d21a97d2644266cbfd0df00e1cf",
+		},
+		"varnishstat (varnish-9.3.0 revision d427508cf3515bf6c33ad7899450c2dff783bf87)": &varnishVersion{
+			Major: 9, Minor: 3, Patch: 0, Revision: "d427508cf3515bf6c33ad7899450c2dff783bf87",
+		},
+		"varnishstat (varnish-9.2.0 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 9, Minor: 2, Patch: 0, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
+		"varnishstat (varnish-9.1.0 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 9, Minor: 1, Patch: 0, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
+		"varnishstat (varnish-9.0.0 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 9, Minor: 0, Patch: 0, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
+		"varnishstat (varnish-8.0.0 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 8, Minor: 0, Patch: 0, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
+		"varnishstat (varnish-7.5.0 revision c56a2bb036b5dbab230722cc87bb5f375c3db89d)": &varnishVersion{
+			Major: 7, Minor: 5, Patch: 0, Revision: "c56a2bb036b5dbab230722cc87bb5f375c3db89d",
+		},
+		"varnishstat (varnish-7.4.0 revision a166160ca51d8d21a97d2644266cbfd0df00e1cf)": &varnishVersion{
+			Major: 7, Minor: 4, Patch: 0, Revision: "a166160ca51d8d21a97d2644266cbfd0df00e1cf",
+		},
+		"varnishstat (varnish-7.3.0 revision d427508cf3515bf6c33ad7899450c2dff783bf87)": &varnishVersion{
+			Major: 7, Minor: 3, Patch: 0, Revision: "d427508cf3515bf6c33ad7899450c2dff783bf87",
+		},
+		"varnishstat (varnish-7.2.0 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 7, Minor: 2, Patch: 0, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
+		"varnishstat (varnish-7.1.0 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 7, Minor: 1, Patch: 0, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
+		"varnishstat (varnish-7.0.0 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
+			Major: 7, Minor: 0, Patch: 0, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
+		},
 		"varnishstat (varnish-6.5.1 revision 1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64)": &varnishVersion{
 			Major: 6, Minor: 5, Patch: 1, Revision: "1dae23376bb5ea7a6b8e9e4b9ed95cdc9469fb64",
 		},

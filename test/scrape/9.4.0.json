@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "timestamp": "2024-03-26T17:06:01",
+  "counters": {
+    "MGT.uptime": {
+      "description": "Management process uptime",
+      "flag": "c",
+      "format": "d",
+      "value": 112
+    },
+    "VBE.boot.default.happy": {
+      "description": "Happy health probes",
+      "flag": "b",
+      "format": "b",
+      "value": 0
+    },
+    "VCP.ref_hit": {
+      "description": "Number of times we have found an existing conn. pool",
+      "flag": "c",
+      "format": "i",
+      "value": 10
+    },
+    "WAITER.conns": {
+      "description": "Number of idle connections",
+      "flag": "g",
+      "format": "i",
+      "value": 5
+    },
+    "SMU.c_bytes": {
+      "description": "Bytes allocated",
+      "flag": "c",
+      "format": "i",
+      "value": 1000
+    },
+    "LCK.dbg_busy": {
+      "description": "Contended lock operations",
+      "flag": "c",
+      "format": "i",
+      "value": 2
+    },
+    "LCK.dbg_try_fail": {
+      "description": "Contended trylock operations",
+      "flag": "c",
+      "format": "i",
+      "value": 1
+    },
+    "MAIN.transit_stored": {
+      "description": "Stored uncacheable body bytes",
+      "flag": "c",
+      "format": "B",
+      "value": 500
+    }
+  }
+}

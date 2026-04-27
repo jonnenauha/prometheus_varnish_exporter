@@ -1,5 +1,6 @@
-
 bin
-
 prometheus_varnish_exporter
 prometheus_varnish_exporter.exe
+prometheus_varnish_exporter_linux_arm64
+package_deb.sh
+dashboards/leventyildirimtr/*
